@@ -1,0 +1,1139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive peat bog simulation comparing photosynthesis, decomposition and burning, with Earth's tilt, zombie fires and global warming.">
+<title>Peat Bog Carbon Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: field station — control panel beside a live bog cross-section, then a graph, a data log, and a climate panel */
+:root {
+  --bg: #f3f6f1;
+  --surface: #ffffff;
+  --sunk: #e9eee6;
+  --ink: #17201a;
+  --muted: #56645a;
+  --line: #d4ddd1;
+  --photo: #2b8a3e;
+  --resp: #9a5a1c;
+  --burn: #d4471f;
+  --co2: #5f6b78;
+  --o2: #2a78bd;
+  --water: #1f9bb0;
+  --sugar: #8b5cb8;
+  --light: #d9a800;
+  --heat: #cc3d27;
+  --sky: #dfeaf3;
+  --peat: #6e4a2e;
+  --peat2: #5a3b24;
+  --ice: #cfe6f2;
+  --ground: #9cb98a;
+  --snow: #ffffff;
+  --focus: #2a78bd;
+  --f-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", Verdana, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1511; --surface: #172019; --sunk: #1d2820; --ink: #e5ece3; --muted: #9eaea1; --line: #2b382e;
+    --photo: #5cc46d; --resp: #d9965a; --burn: #ff7043; --co2: #9ca7b3; --o2: #62a9ea; --water: #4fc5d8; --sugar: #c39be8;
+    --light: #f2cc3a; --heat: #f2694f; --sky: #16263a; --peat: #4a3220; --peat2: #3c2818; --ice: #2e4b5c; --ground: #34502c; --snow: #d4dde3; --focus: #62a9ea;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1511; --surface: #172019; --sunk: #1d2820; --ink: #e5ece3; --muted: #9eaea1; --line: #2b382e;
+  --photo: #5cc46d; --resp: #d9965a; --burn: #ff7043; --co2: #9ca7b3; --o2: #62a9ea; --water: #4fc5d8; --sugar: #c39be8;
+  --light: #f2cc3a; --heat: #f2694f; --sky: #16263a; --peat: #4a3220; --peat2: #3c2818; --ice: #2e4b5c; --ground: #34502c; --snow: #d4dde3; --focus: #62a9ea;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+  display: flex; flex-direction: column; gap: 40px;
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 4.5vw, 2.9rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { max-width: 70ch; color: var(--muted); font-size: 1.05rem; }
+.head { display: flex; flex-direction: column; gap: 10px; }
+.key-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 8px; }
+.proc { padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.proc h3 { display: flex; align-items: center; gap: 8px; }
+.proc .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.io { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.92rem; }
+.io .arrow { color: var(--muted); font-family: var(--f-mono); }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; background: var(--sunk); font-size: 0.85rem; white-space: nowrap; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+section { display: flex; flex-direction: column; gap: 16px; }
+.lab { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .lab { grid-template-columns: minmax(0, 1fr); } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ctrl { display: flex; flex-direction: column; gap: 4px; }
+.ctrl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ctrl label { font-weight: 700; font-size: 0.95rem; }
+.ctrl output { font-family: var(--f-mono); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ctrl .hint { font-size: 0.8rem; color: var(--muted); }
+input[type="range"] { width: 100%; accent-color: var(--photo); margin: 4px 0 0; height: 24px; }
+select, button { font: inherit; }
+select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--sunk); color: var(--ink); cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--photo); border-color: var(--photo); color: var(--bg); }
+.btn:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets .btn { font-weight: 400; font-size: 0.82rem; padding: 5px 10px; }
+.sub { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+.tiltbox { background: var(--sunk); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.tiltbox svg { width: 100%; height: auto; display: block; }
+.facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; font-size: 0.82rem; margin: 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-family: var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; }
+
+.stage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+.diagram svg { width: 100%; height: auto; display: block; border-radius: 8px; }
+svg text { font-family: var(--f-body); fill: var(--ink); }
+svg .lbl { font-size: 13px; }
+svg .lbl-sm { font-size: 11.5px; fill: var(--muted); }
+svg .lbl-b { font-size: 14px; font-weight: 700; }
+svg .on-peat { fill: #f4ead9; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 6px 2px; }
+
+.meters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .meters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .meters { grid-template-columns: minmax(0, 1fr); } }
+.meter { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.meter .val { font-family: var(--f-display); font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.meter .unit { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); }
+.bar { height: 10px; border-radius: 6px; background: var(--sunk); overflow: hidden; position: relative; }
+.bar > span { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 6px; transition: width .25s ease, left .25s ease; }
+.bar.net::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: var(--muted); }
+.meter p { font-size: 0.85rem; color: var(--muted); }
+
+.notes { display: flex; flex-direction: column; gap: 8px; }
+.note { padding: 10px 14px; border-radius: 10px; background: var(--sunk); font-size: 0.93rem; border-left: 4px solid var(--muted); }
+.note b { font-family: var(--f-display); }
+.note.photo { border-left-color: var(--photo); }
+.note.resp { border-left-color: var(--resp); }
+.note.ice { border-left-color: var(--o2); }
+.note.warn { border-left-color: var(--burn); }
+
+.chart-box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.axis line { stroke: var(--line); }
+.axis text { font-family: var(--f-mono); font-size: 11px; fill: var(--muted); }
+.grid line { stroke: var(--line); stroke-dasharray: 2 4; }
+.axis-title { font-family: var(--f-body); font-size: 12px; fill: var(--muted); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-family: var(--f-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 500; background: var(--sunk); }
+th:first-child, td:first-child { text-align: left; }
+td.p { color: var(--photo); font-weight: 700; }
+td.r { color: var(--resp); font-weight: 700; }
+td.b { color: var(--burn); font-weight: 700; }
+.empty { padding: 18px; color: var(--muted); font-size: 0.9rem; }
+.status { font-size: 0.85rem; color: var(--muted); }
+
+.try { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; padding: 0; margin: 0; list-style: none; }
+.try li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 0.93rem; }
+.try li b { display: block; font-family: var(--f-display); margin-bottom: 2px; }
+
+.divider { height: 1px; background: var(--line); }
+.climate { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .climate { grid-template-columns: minmax(0, 1fr); } }
+.climate-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .climate-charts { grid-template-columns: minmax(0, 1fr); } }
+.flowbars { display: flex; flex-direction: column; gap: 8px; }
+.flowbar { display: grid; grid-template-columns: 130px minmax(0, 1fr) 52px; align-items: center; gap: 8px; font-size: 0.85rem; }
+.flowbar .num { font-family: var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.explain { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.explain div { font-size: 0.93rem; }
+.explain h3 { margin-bottom: 4px; }
+.mirror { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.mirror-scroll { overflow-x: auto; }
+.mgrid { display: grid; grid-template-columns: 170px repeat(3, minmax(96px, 1fr)) 64px repeat(2, minmax(96px, 1fr)); gap: 8px 8px; align-items: center; min-width: 760px; }
+.mgrid .rl { font-family: var(--f-display); font-weight: 700; font-size: 0.98rem; display: flex; flex-direction: column; line-height: 1.2; }
+.mgrid .rl small { font-family: var(--f-body); font-weight: 400; font-size: 0.78rem; color: var(--muted); }
+.cell { padding: 8px 10px; border-radius: 8px; background: var(--sunk); font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px; border-top: 4px solid var(--line); }
+.cell i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.cell.plus::after { content: "+"; margin-left: auto; color: var(--muted); font-weight: 400; }
+.big-arrow { font-family: var(--f-display); font-size: 2rem; font-weight: 700; text-align: center; line-height: 1; }
+.colhead { font-family: var(--f-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.mirror .status b { color: var(--ink); }
+.o2read { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: var(--sunk); }
+.o2read .ctrl-top { font-size: 0.82rem; }
+.o2read b { color: var(--o2); }
+.o2read output { color: var(--o2); }
+.zombie { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .zombie { grid-template-columns: minmax(0, 1fr); } }
+.chance { font-family: var(--f-display); font-size: 2.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.seasons { display: flex; flex-wrap: wrap; gap: 6px; }
+.seasons .btn { font-weight: 400; }
+.seasons .btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.caption { font-size: 0.95rem; padding: 10px 14px; border-radius: 10px; background: var(--sunk); border-left: 4px solid var(--burn); min-height: 3.2em; }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="head">
+    <span class="eyebrow">Interactive simulation · Life &amp; Earth science</span>
+    <h1>Peat Bog Carbon Lab</h1>
+    <p class="lede">In an Arctic peat bog, plants pull carbon out of the air and store it in their bodies. When they die, the cold, soggy ground keeps them from rotting, so they pile up as peat over thousands of years. Change the conditions and see whether the bog stores carbon or releases it.</p>
+    <div class="key-compare">
+      <div class="proc">
+        <h3><span class="dot" style="background: var(--photo)"></span>Photosynthesis · bog plants</h3>
+        <div class="io"><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--light)"></i>Sunlight</span><span class="arrow">→</span><span class="chip"><i style="background: var(--sugar)"></i>Glucose</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span></div>
+        <p class="status">Mosses and sedges store carbon in glucose and plant tissue. Dead plants become peat.</p>
+      </div>
+      <div class="proc">
+        <h3><span class="dot" style="background: var(--resp)"></span>Decomposition · cellular respiration</h3>
+        <div class="io"><span class="chip"><i style="background: var(--sugar)"></i>Peat (glucose)</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span><span class="arrow">→</span><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--resp)"></i>Energy</span></div>
+        <p class="status">Bacteria and fungi break down peat slowly to get energy.</p>
+      </div>
+      <div class="proc">
+        <h3><span class="dot" style="background: var(--burn)"></span>Burning · combustion</h3>
+        <div class="io"><span class="chip"><i style="background: var(--sugar)"></i>Peat (fuel)</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span><span class="arrow">→</span><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--burn)"></i>Heat &amp; light</span></div>
+        <p class="status">Same inputs and outputs as respiration, but the energy comes out all at once.</p>
+      </div>
+    </div>
+    <div class="mirror">
+      <h3>Photosynthesis and respiration are opposite reactions</h3>
+      <div class="mirror-scroll">
+        <div class="mgrid">
+          <span></span><span class="colhead" style="grid-column: span 3">Carbon dioxide, water and energy</span><span></span><span class="colhead" style="grid-column: span 2">Glucose and oxygen</span>
+          <div class="rl" style="color: var(--photo)">Photosynthesis<small>read left to right</small></div>
+          <div class="cell plus" style="border-top-color: var(--co2)"><i style="background: var(--co2)"></i>CO₂</div><div class="cell plus" style="border-top-color: var(--water)"><i style="background: var(--water)"></i>Water</div><div class="cell" style="border-top-color: var(--light)"><i style="background: var(--light)"></i>Light energy</div>
+          <div class="big-arrow" style="color: var(--photo)" aria-label="makes">→</div>
+          <div class="cell plus" style="border-top-color: var(--sugar)"><i style="background: var(--sugar)"></i>Glucose</div><div class="cell" style="border-top-color: var(--o2)"><i style="background: var(--o2)"></i>Oxygen</div>
+          <div class="rl" style="color: var(--resp)">Cellular respiration<small>decomposers · read right to left</small></div>
+          <div class="cell plus" style="border-top-color: var(--co2)"><i style="background: var(--co2)"></i>CO₂</div><div class="cell plus" style="border-top-color: var(--water)"><i style="background: var(--water)"></i>Water</div><div class="cell" style="border-top-color: var(--resp)"><i style="background: var(--resp)"></i>Energy (ATP)</div>
+          <div class="big-arrow" style="color: var(--resp)" aria-label="made from">←</div>
+          <div class="cell plus" style="border-top-color: var(--sugar)"><i style="background: var(--sugar)"></i>Glucose</div><div class="cell" style="border-top-color: var(--o2)"><i style="background: var(--o2)"></i>Oxygen</div>
+          <div class="rl" style="color: var(--burn)">Burning<small>read right to left</small></div>
+          <div class="cell plus" style="border-top-color: var(--co2)"><i style="background: var(--co2)"></i>CO₂</div><div class="cell plus" style="border-top-color: var(--water)"><i style="background: var(--water)"></i>Water</div><div class="cell" style="border-top-color: var(--burn)"><i style="background: var(--burn)"></i>Heat &amp; light</div>
+          <div class="big-arrow" style="color: var(--burn)" aria-label="made from">←</div>
+          <div class="cell plus" style="border-top-color: var(--sugar)"><i style="background: var(--sugar)"></i>Peat (glucose)</div><div class="cell" style="border-top-color: var(--o2)"><i style="background: var(--o2)"></i>Oxygen</div>
+        </div>
+      </div>
+      <p class="status">The same substances appear in every row, but the arrow points the opposite way. <b>The outputs of photosynthesis are the inputs of respiration, and the outputs of respiration are the inputs of photosynthesis.</b> Photosynthesis stores the sun's energy in glucose. Respiration and burning release that energy and return the carbon to the air. Peat builds up only when photosynthesis runs faster than its opposites.</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="lab-h">
+    <h2 id="lab-h">The bog</h2>
+    <div class="lab">
+      <div class="panel" id="controls">
+        <div class="ctrl" style="gap:8px">
+          <span class="sub">Quick scenarios</span>
+          <div class="presets" id="presets"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="s-tilt">Earth's tilt</label><output id="o-tilt" for="s-tilt"></output></div>
+          <input type="range" id="s-tilt" min="22.1" max="24.5" step="0.05" value="23.44">
+          <span class="hint">Earth's tilt slowly rocks between 22.1° and 24.5° over about 41,000 years.</span>
+          <div class="presets" id="tiltPresets" style="margin-top:6px"></div>
+        </div>
+        <div class="tiltbox">
+          <svg id="earth" viewBox="0 0 300 170" role="img" aria-label="Earth tilted toward the sun on the longest day of summer, with the Arctic Circle and 65 degrees north marked"></svg>
+          <dl class="facts">
+            <dt>Noon sun height at 65°N, longest day</dt><dd id="fSun"></dd>
+            <dt>Summer sunlight at 65°N</dt><dd id="fQ"></dd>
+            <dt>Change from today</dt><dd id="fQd"></dd>
+            <dt>Summer warming from tilt</dt><dd id="fT"></dd>
+          </dl>
+        </div>
+        <div id="sliders" style="display:flex;flex-direction:column;gap:14px"></div>
+      </div>
+
+      <div class="stage">
+        <div class="diagram">
+          <svg id="bog" viewBox="0 0 700 400" role="img" aria-label="Cross-section of a peat bog. Arrows show carbon dioxide and oxygen moving between the air, the plants, the decomposers in the peat, and any fire. Thicker, faster arrows mean a faster rate."></svg>
+          <div class="legend" aria-hidden="true">
+            <span class="chip"><i style="background: var(--light)"></i>Sunlight</span>
+            <span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span>
+            <span class="chip"><i style="background: var(--o2)"></i>Oxygen</span>
+            <span class="chip"><i style="background: var(--water)"></i>Water</span>
+            <span class="chip"><i style="background: var(--sugar)"></i>Dead plants (stored carbon)</span>
+            <span class="chip"><i style="background: var(--burn)"></i>Heat &amp; light</span>
+          </div>
+        </div>
+
+        <div class="meters">
+          <div class="meter">
+            <span class="sub">Photosynthesis</span>
+            <div><span class="val" id="pVal" style="color: var(--photo)">0</span> <span class="unit">/ 100</span></div>
+            <div class="bar"><span id="pBar" style="background: var(--photo)"></span></div>
+            <p>Carbon taken in</p>
+          </div>
+          <div class="meter">
+            <span class="sub">Decomposition</span>
+            <div><span class="val" id="dVal" style="color: var(--resp)">0</span> <span class="unit">/ 100</span></div>
+            <div class="bar"><span id="dBar" style="background: var(--resp)"></span></div>
+            <p>Carbon released by decomposers</p>
+          </div>
+          <div class="meter">
+            <span class="sub">Burning</span>
+            <div><span class="val" id="bVal" style="color: var(--burn)">0</span> <span class="unit">/ 100</span></div>
+            <div class="bar"><span id="bBar" style="background: var(--burn)"></span></div>
+            <p>Carbon released by fire</p>
+          </div>
+          <div class="meter">
+            <span class="sub">Peat carbon</span>
+            <span class="unit">photosynthesis − decomposition − burning</span>
+            <div><span class="val" id="nVal">0</span></div>
+            <div class="bar net"><span id="nBar"></span></div>
+            <p id="nText"></p>
+          </div>
+        </div>
+        <div class="notes" id="notes" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="graph-h">
+    <div class="chart-box">
+      <div class="row" style="justify-content: space-between">
+        <h2 id="graph-h" style="font-size:1.3rem">Test one variable</h2>
+        <div class="row">
+          <label for="xVar" class="status">Change this variable:</label>
+          <select id="xVar"></select>
+        </div>
+      </div>
+      <p class="status">The graph shows each rate across the full range of one variable while every other setting stays where you left it. The dashed line marks your current setting.</p>
+      <svg id="explore" viewBox="0 0 640 300" role="img" aria-label="Line graph of photosynthesis, decomposition and burning rates against the chosen variable"></svg>
+      <div class="legend">
+        <span class="chip"><i style="background: var(--photo)"></i>Photosynthesis</span>
+        <span class="chip"><i style="background: var(--resp)"></i>Decomposition</span>
+        <span class="chip"><i style="background: var(--burn)"></i>Burning</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="zombie-h">
+    <div class="head">
+      <span class="eyebrow">Real-world connection · Arctic wildfires</span>
+      <h2 id="zombie-h">Zombie fires</h2>
+      <p class="lede">Some Arctic peat fires never really go out. After the flames die in the fall, the fire keeps smoldering underground all winter, hidden under the snow. In spring it bursts back to the surface. Scientists call these overwintering or "zombie" fires. They have come back in Alaska, Canada, and Siberia in recent years, as warmer summers dry out and thaw more peat.</p>
+    </div>
+    <div class="zombie">
+      <div class="panel">
+        <span class="sub">Using the bog settings above</span>
+        <div>
+          <div class="chance" id="zChance" style="color: var(--burn)">0%</div>
+          <p class="status">Chance this fire survives the winter</p>
+        </div>
+        <div class="flowbars" id="zFactors"></div>
+        <p class="status" id="zWhy"></p>
+        <button class="btn primary" id="zSetup" type="button">Set up zombie fire conditions</button>
+      </div>
+      <div class="stage">
+        <div class="seasons" role="group" aria-label="Season">
+          <button class="btn" type="button" data-season="0" aria-pressed="true">Summer</button>
+          <button class="btn" type="button" data-season="1" aria-pressed="false">Fall</button>
+          <button class="btn" type="button" data-season="2" aria-pressed="false">Winter</button>
+          <button class="btn" type="button" data-season="3" aria-pressed="false">Spring</button>
+          <button class="btn primary" type="button" id="zPlay">Play a year</button>
+        </div>
+        <div class="diagram">
+          <svg id="zsvg" viewBox="0 0 700 300" role="img" aria-label="Cross-section of a peat bog through the seasons, showing a fire smoldering underground under winter snow and returning in spring."></svg>
+        </div>
+        <p class="caption" id="zCaption" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="log-h">
+    <div class="row" style="justify-content: space-between">
+      <h2 id="log-h" style="font-size:1.3rem">Data table</h2>
+      <div class="row">
+        <button class="btn primary" id="record" type="button">Record this trial</button>
+        <button class="btn" id="copy" type="button">Copy table</button>
+        <button class="btn" id="clear" type="button">Clear</button>
+      </div>
+    </div>
+    <p class="status" id="logStatus">Record a trial each time you change one variable. Copy the table into a spreadsheet or document to graph it.</p>
+    <div class="table-wrap" id="logWrap"></div>
+  </section>
+
+  <section aria-labelledby="try-h">
+    <h2 id="try-h" style="font-size:1.3rem">Investigations to try</h2>
+    <ul class="try">
+      <li><b>High tilt</b>Set the tilt to 24.2°, like about 10,700 years ago. What happens to summer sunlight, temperature, and photosynthesis in the Arctic?</li>
+      <li><b>Low tilt</b>Set the tilt to 22.1°. How much of the peat freezes into permafrost? Why can't decomposers or fire reach frozen peat?</li>
+      <li><b>Why peat builds up</b>Lower the water level from 80% to 10%. What happens to the oxygen in the peat, and to decomposition?</li>
+      <li><b>Peat fire</b>Set burning to 60%. Try it with a wet bog, then a dry bog. Which one releases more CO₂?</li>
+      <li><b>Opposites cancel out</b>Find settings where photosynthesis and decomposition are equal and there is no fire. What happens to the peat? Why does carbon stop building up?</li>
+      <li><b>Compare the outputs</b>Decomposition and burning both release CO₂. What inputs do they share? How is the energy released differently?</li>
+      <li><b>Zombie fire</b>Start a fire, then raise the water level a little at a time. At what water level does the fire stop surviving the winter? Why does water put it out?</li>
+      <li><b>Thaw</b>Choose "Arctic heat wave." Is the bog still a carbon sink, or has it become a carbon source?</li>
+    </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <section aria-labelledby="climate-h">
+    <div class="head">
+      <span class="eyebrow">Bonus · Earth science connection</span>
+      <h2 id="climate-h">Carbon dioxide and global warming</h2>
+      <p class="lede">Photosynthesis pulls CO₂ out of the air. Decomposition and burning put it back. Peat, coal, oil, and gas all formed from ancient plants, so burning them releases carbon that photosynthesis stored long ago. When more CO₂ goes into the air than plants and oceans can remove, it builds up and traps heat.</p>
+    </div>
+
+    <div class="climate">
+      <div class="panel">
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="fossil">Burning fossil fuels</label><output id="fossilOut" for="fossil"></output></div>
+          <input type="range" id="fossil" min="0" max="20" step="0.5" value="10">
+          <span class="hint">Billions of tonnes of carbon per year. Today is about 10.</span>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="forest">Forests and peatlands</label><output id="forestOut" for="forest"></output></div>
+          <input type="range" id="forest" min="25" max="150" step="5" value="100">
+          <span class="hint">Compared with today. Protecting them keeps photosynthesis pulling in CO₂. Draining, clearing, or burning them releases stored carbon.</span>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-top"><label for="year">Show year</label><output id="yearOut" for="year"></output></div>
+          <input type="range" id="year" min="2025" max="2100" step="1" value="2100">
+        </div>
+        <div class="divider"></div>
+        <div class="flowbars">
+          <span class="sub">Carbon each year (billion tonnes)</span>
+          <div class="flowbar"><span>Fossil fuels</span><div class="bar"><span id="b-fossil" style="background: var(--burn)"></span></div><span class="num" id="n-fossil"></span></div>
+          <div class="flowbar"><span>Clearing &amp; draining land</span><div class="bar"><span id="b-clear" style="background: var(--burn)"></span></div><span class="num" id="n-clear"></span></div>
+          <div class="flowbar"><span>Taken up by plants</span><div class="bar"><span id="b-land" style="background: var(--photo)"></span></div><span class="num" id="n-land"></span></div>
+          <div class="flowbar"><span>Taken up by oceans</span><div class="bar"><span id="b-ocean" style="background: var(--o2)"></span></div><span class="num" id="n-ocean"></span></div>
+          <p class="status" id="balanceText"></p>
+        </div>
+        <button class="btn primary" id="sendBog" type="button">Test the bog in this year</button>
+        <p class="status">Sets the bog to that year's CO₂ level. The Arctic warms about 2.5 times faster than the planet as a whole, so its summer temperature rises more.</p>
+      </div>
+
+      <div class="stage">
+        <div class="diagram">
+          <svg id="gh" viewBox="0 0 600 300" role="img" aria-label="Greenhouse effect diagram: sunlight reaches the ground, the ground gives off heat, and carbon dioxide in the atmosphere sends some of that heat back down."></svg>
+        </div>
+        <div class="climate-charts">
+          <div class="chart-box"><span class="sub">CO₂ in the air (ppm)</span><svg id="c-co2" viewBox="0 0 360 220" role="img" aria-label="Line graph of carbon dioxide from 2025 to 2100"></svg></div>
+          <div class="chart-box"><span class="sub">Warming since the 1800s (°C)</span><svg id="c-temp" viewBox="0 0 360 220" role="img" aria-label="Line graph of global warming from 2025 to 2100"></svg></div>
+        </div>
+        <div class="explain">
+          <div><h3>Why CO₂ traps heat</h3><p>Sunlight passes through the air and warms the ground. The ground gives off heat as infrared energy. CO₂ molecules absorb that heat and send some of it back down, like a blanket.</p></div>
+          <div><h3>Why it matters for peat</h3><p>Warming thaws permafrost and dries out bogs. Decomposers wake up, and dry peat can burn, even as zombie fires that last through the winter. Both release more CO₂, which causes more warming. Scientists call this a feedback loop.</p></div>
+        </div>
+      </div>
+    </div>
+    <p class="status">This is a simplified model for learning. Rates are on a 0–100 scale chosen to show trends, not real measurements. Real climate projections include many more factors, such as other greenhouse gases, clouds, ice, and how oceans store heat.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const NS = "http://www.w3.org/2000/svg";
+  const RAD = Math.PI / 180;
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function paint(e, prop, token) { e.style[prop] = `var(${token})`; return e; }
+
+  /* ---------- Earth's tilt: daily sunlight at 65°N on the summer solstice ---------- */
+  const LAT = 65, TILT_NOW = 23.44;
+  function solstice(tilt) {
+    const f = LAT * RAD, d = tilt * RAD;
+    const x = -Math.tan(f) * Math.tan(d);
+    const h = x <= -1 ? Math.PI : Math.acos(x);
+    return 1361 / Math.PI * (h * Math.sin(f) * Math.sin(d) + Math.cos(f) * Math.cos(d) * Math.sin(h));
+  }
+  const Q_NOW = solstice(TILT_NOW);
+  const tiltWarming = (tilt) => 0.1 * (solstice(tilt) - Q_NOW);
+
+  const VARS = [
+    { key: "tilt", label: "Earth's tilt", min: 22.1, max: 24.5, step: 0.05, unit: "°", fmt: v => v.toFixed(2) + "°" },
+    { key: "temp", label: "Summer temperature", min: -5, max: 30, step: 1, unit: "°C", fmt: v => v + " °C", hint: "Average Arctic summer air temperature before the tilt effect. About 10 °C today." },
+    { key: "co2", label: "Carbon dioxide", min: 0, max: 2000, step: 10, unit: "ppm", fmt: v => v + " ppm", hint: "Air today is about 420 ppm." },
+    { key: "o2", label: "Oxygen in the air", min: 0, max: 35, step: 1, unit: "%", fmt: v => v + "%", hint: "Air today is about 21%. Fire needs more than about 12%." },
+    { key: "wet", label: "Water level in the bog", min: 0, max: 100, step: 1, unit: "%", fmt: v => v + "%", hint: "Water fills the air spaces in the peat. Higher water means less oxygen for decomposers and fire." },
+    { key: "burn", label: "Burning", min: 0, max: 100, step: 1, unit: "%", fmt: v => v + "%", hint: "Wildfire from lightning, or people cutting and burning peat for fuel." }
+  ];
+  const DEFAULTS = { tilt: TILT_NOW, temp: 10, co2: 420, o2: 21, wet: 75, burn: 0 };
+  const ZOMBIE = { tilt: TILT_NOW, temp: 19, co2: 420, o2: 21, wet: 22, burn: 55 };
+  const S = Object.assign({}, DEFAULTS);
+
+  const PRESETS = [
+    ["Arctic summer today", DEFAULTS],
+    ["High tilt, 10,700 years ago", Object.assign({}, DEFAULTS, { tilt: 24.2, co2: 260 })],
+    ["Low tilt (22.1°)", Object.assign({}, DEFAULTS, { tilt: 22.1 })],
+    ["Drained bog", Object.assign({}, DEFAULTS, { wet: 12 })],
+    ["Peat wildfire in a drought", Object.assign({}, DEFAULTS, { wet: 15, temp: 16, burn: 70 })],
+    ["Arctic heat wave", Object.assign({}, DEFAULTS, { temp: 20, wet: 45 })],
+    ["Zombie fire conditions", ZOMBIE],
+    ["Reset", DEFAULTS]
+  ];
+  const TILT_PRESETS = [["Lowest · 22.1°", 22.1], ["Today · 23.44°", 23.44], ["10,700 yrs ago · 24.2°", 24.2], ["Highest · 24.5°", 24.5]];
+
+  /* ---------- model ---------- */
+  function model(s) {
+    const q = solstice(s.tilt), relQ = q / Q_NOW;
+    const T = s.temp + tiltWarming(s.tilt);
+    const fL = 0.8 * relQ;
+    const x = Math.max(0, s.co2 - 50);
+    const fC = 1.2 * x / (x + 400);
+    let fT = 0;
+    if (T > -2) fT = T <= 18 ? Math.exp(-Math.pow((T - 18) / 12, 2)) : Math.exp(-Math.pow((T - 18) / 9, 2));
+    const fW = 0.3 + 0.7 * (1 - Math.exp(-s.wet / 25));
+    const fO = clamp(1.15 - 0.007 * s.o2, 0.5, 1.15);
+    const P = clamp(100 * fL * fC * fT * fW * fO, 0, 100);
+
+    const perm = clamp((11 - T) / 8, 0, 1);
+    const soilO2 = (s.o2 / 21) * (1 - 0.85 * s.wet / 100);
+    const fOD = soilO2 * 1.3 / (soilO2 + 0.3);
+    const den = T > 40 ? Math.exp(-Math.pow((T - 40) / 6, 2)) : 1;
+    const D = clamp(30 * Math.pow(2, (T - 12) / 10) * den * fOD * (1 - 0.95 * perm), 0, 100);
+
+    const dry = 1 - 0.9 * s.wet / 100;
+    const fOB = clamp((s.o2 - 12) / 9, 0, 1.6);
+    const B = clamp(s.burn * dry * fOB * (1 - 0.9 * perm) * 1.1, 0, 100);
+    return { P, D, B, N: P - D - B, T, q, relQ, perm, soilO2, f: { light: fL / 0.8, co2: fC, temp: fT, water: fW } };
+  }
+
+  /* ---------- controls ---------- */
+  const sliders = $("sliders");
+  VARS.filter(v => v.key !== "tilt").forEach(v => {
+    const d = document.createElement("div");
+    d.className = "ctrl";
+    d.innerHTML = `<div class="ctrl-top"><label for="s-${v.key}">${v.label}</label><output id="o-${v.key}" for="s-${v.key}"></output></div>
+      <input type="range" id="s-${v.key}" min="${v.min}" max="${v.max}" step="${v.step}" value="${S[v.key]}">
+      <span class="hint">${v.hint}</span>${v.key === "temp" ? '<span class="hint" id="effT"></span>' : ""}${v.key === "wet" ? '<div class="o2read"><div class="ctrl-top"><b>Oxygen in the peat</b><output id="o2Peat"></output></div><div class="bar"><span id="o2PeatBar" style="background: var(--o2)"></span></div><span class="hint" id="o2PeatTxt"></span></div>' : ""}`;
+    sliders.appendChild(d);
+  });
+  VARS.forEach(v => $("s-" + v.key).addEventListener("input", e => { S[v.key] = +e.target.value; update(); }));
+  function addButtons(box, list, fn) {
+    list.forEach(([name, val]) => {
+      const b = document.createElement("button");
+      b.className = "btn"; b.type = "button"; b.textContent = name;
+      b.addEventListener("click", () => fn(val));
+      box.appendChild(b);
+    });
+  }
+  addButtons($("presets"), PRESETS, vals => setState(vals));
+  addButtons($("tiltPresets"), TILT_PRESETS, t => setState({ tilt: t }));
+  function setState(vals) {
+    Object.assign(S, vals);
+    VARS.forEach(v => { $("s-" + v.key).value = S[v.key]; });
+    update();
+  }
+  const xSel = $("xVar");
+  VARS.forEach(v => { const o = document.createElement("option"); o.value = v.key; o.textContent = v.label; xSel.appendChild(o); });
+  xSel.value = "temp";
+  xSel.addEventListener("change", drawExplore);
+
+  /* ---------- Earth diagram ---------- */
+  function drawEarth() {
+    const svg = $("earth"); svg.innerHTML = "";
+    const cx = 190, cy = 88, r = 62, t = S.tilt;
+    for (let i = 0; i < 5; i++) {
+      const y = cy - 48 + i * 24;
+      const ln = el("line", { x1: 8, y1: y, x2: cx - Math.sqrt(Math.max(0, r * r - (y - cy) * (y - cy))) - 2, y2: y, "stroke-width": 2 }, svg);
+      paint(ln, "stroke", "--light"); ln.style.strokeOpacity = "0.7";
+    }
+    el("text", { x: 8, y: 16, class: "lbl-sm" }, svg).textContent = "Sunlight";
+    const disk = el("circle", { cx, cy, r }, svg); paint(disk, "fill", "--water"); disk.style.fillOpacity = "0.35";
+    const night = el("path", { d: `M ${cx} ${cy - r} A ${r} ${r} 0 0 1 ${cx} ${cy + r} Z` }, svg);
+    paint(night, "fill", "--ink"); night.style.fillOpacity = "0.28";
+    const g = el("g", { transform: `rotate(${-t} ${cx} ${cy})` }, svg);
+    const axis = el("line", { x1: cx, y1: cy - r - 18, x2: cx, y2: cy + r + 18, "stroke-width": 2 }, g); paint(axis, "stroke", "--ink");
+    const eq = el("line", { x1: cx - r, y1: cy, x2: cx + r, y2: cy, "stroke-width": 1.2, "stroke-dasharray": "3 3" }, g); paint(eq, "stroke", "--ink");
+    const ac = 90 - t, yac = cy - r * Math.sin(ac * RAD), wac = r * Math.cos(ac * RAD);
+    const arc = el("line", { x1: cx - wac, y1: yac, x2: cx + wac, y2: yac, "stroke-width": 1.5, "stroke-dasharray": "4 3" }, g); paint(arc, "stroke", "--o2");
+    const y65 = cy - r * Math.sin(LAT * RAD), w65 = r * Math.cos(LAT * RAD);
+    const l65 = el("line", { x1: cx - w65, y1: y65, x2: cx + w65, y2: y65, "stroke-width": 2.5 }, g); paint(l65, "stroke", "--peat");
+    const dot = el("circle", { cx: cx - w65, cy: y65, r: 4.5 }, g); paint(dot, "fill", "--burn");
+    const vert = el("line", { x1: cx, y1: cy - r - 18, x2: cx, y2: cy - r + 4, "stroke-width": 1, "stroke-dasharray": "2 3" }, svg); paint(vert, "stroke", "--muted");
+    el("text", { x: cx + 8, y: cy - r - 6, class: "lbl-sm" }, svg).textContent = `${t.toFixed(2)}° tilt`;
+    el("text", { x: 262, y: cy + 4, class: "lbl-sm" }, svg).textContent = "night";
+    el("text", { x: 8, y: 162, class: "lbl-sm" }, svg).textContent = "● 65°N peatlands  - - Arctic Circle";
+  }
+
+  /* ---------- bog diagram ---------- */
+  const SURF = 150, BASE = 352;
+  const bog = $("bog");
+  const L = {};
+  (function buildBog() {
+    const defs = el("defs", {}, bog);
+    const pat = el("pattern", { id: "icehatch", width: 8, height: 8, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+    paint(el("rect", { width: 8, height: 8 }, pat), "fill", "--ice");
+    const hl = el("line", { x1: 0, y1: 0, x2: 0, y2: 8, "stroke-width": 3 }, pat); paint(hl, "stroke", "--o2"); hl.style.strokeOpacity = "0.35";
+    paint(el("rect", { x: 0, y: 0, width: 700, height: SURF }, bog), "fill", "--sky");
+    paint(el("rect", { x: 0, y: SURF, width: 700, height: BASE - SURF }, bog), "fill", "--peat");
+    for (let i = 0; i < 5; i++) {
+      const y = SURF + 26 + i * 38;
+      const band = el("path", { d: `M 0 ${y} Q 175 ${y - 6} 350 ${y} T 700 ${y} L 700 ${y + 19} Q 525 ${y + 25} 350 ${y + 19} T 0 ${y + 19} Z` }, bog);
+      paint(band, "fill", "--peat2"); band.style.fillOpacity = "0.7";
+    }
+    paint(el("rect", { x: 0, y: BASE, width: 700, height: 400 - BASE }, bog), "fill", "--sunk");
+    el("text", { x: 10, y: 392, class: "lbl-sm" }, bog).textContent = "sand and rock under the bog";
+    L.water = el("rect", { x: 0, width: 700 }, bog); paint(L.water, "fill", "--water"); L.water.style.fillOpacity = "0.22";
+    L.wline = el("line", { x1: 0, x2: 700, "stroke-width": 2, "stroke-dasharray": "8 5" }, bog); paint(L.wline, "stroke", "--water");
+    L.wlbl = el("text", { x: 694, "text-anchor": "end", class: "lbl-sm on-peat" }, bog); L.wlbl.textContent = "water level";
+    L.pores = [];
+    let ps = 11; const pr = () => (ps = (ps * 9301 + 49297) % 233280) / 233280;
+    for (let i = 0; i < 70; i++) {
+      const c = el("circle", { cx: (pr() * 690 + 5).toFixed(1), cy: (SURF + 8 + pr() * (BASE - SURF - 14)).toFixed(1), r: 2.6 }, bog);
+      paint(c, "fill", "--o2"); c.style.filter = "brightness(1.5)"; L.pores.push(c);
+    }
+    L.embers = [];
+    for (let i = 0; i < 30; i++) {
+      const c = el("circle", { cx: (560 + pr() * 130).toFixed(1), cy: 0, r: 3 }, bog);
+      paint(c, "fill", "--burn"); c.dataset.d = pr().toFixed(3); L.embers.push(c);
+    }
+    L.airLbl = el("text", { x: 54, class: "lbl on-peat" }, bog);
+    L.wetLbl = el("text", { x: 54, class: "lbl on-peat" }, bog);
+    L.perm = el("rect", { x: 0, width: 700, fill: "url(#icehatch)" }, bog);
+    L.plbl = el("text", { x: 694, "text-anchor": "end", class: "lbl-b" }, bog); paint(L.plbl, "fill", "--o2");
+    el("text", { x: 196, y: 186, class: "lbl-sm on-peat" }, bog).textContent = "young peat (recent dead plants)";
+    el("text", { x: 196, y: 338, class: "lbl-sm on-peat" }, bog).textContent = "old peat (thousands of years old)";
+    let seed = 3; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    L.microbes = el("g", {}, bog);
+    for (let i = 0; i < 26; i++) {
+      const m = el("ellipse", { cx: (390 + rnd() * 140).toFixed(1), cy: (172 + rnd() * 160).toFixed(1), rx: 3.4, ry: 2 }, L.microbes);
+      paint(m, "fill", "--light");
+    }
+    L.microbeEls = Array.from(L.microbes.children);
+    el("text", { x: 455, y: 202, "text-anchor": "middle", class: "lbl on-peat" }, bog).textContent = "Decomposers";
+    el("text", { x: 455, y: 216, "text-anchor": "middle", class: "lbl-sm on-peat" }, bog).textContent = "bacteria and fungi";
+    L.plants = el("g", {}, bog);
+    for (let x = 12; x < 560; x += 15) {
+      const h = 10 + ((x * 7) % 11);
+      const moss = el("ellipse", { cx: x, cy: SURF - 2, rx: 9, ry: 5 }, L.plants); paint(moss, "fill", "--photo");
+      if ((x / 15) % 2 < 1) {
+        const sedge = el("path", { d: `M ${x} ${SURF - 4} q -3 ${-h / 2} -6 ${-h} M ${x} ${SURF - 4} q 1 ${-h / 2} 2 ${-h - 4} M ${x} ${SURF - 4} q 4 ${-h / 2} 8 ${-h + 2}`, fill: "none", "stroke-width": 1.6 }, L.plants);
+        paint(sedge, "stroke", "--photo");
+      }
+    }
+    el("text", { x: 60, y: SURF + 18, class: "lbl on-peat" }, bog).textContent = "Sphagnum moss and sedges";
+    L.beam = el("line", { "stroke-width": 26, "stroke-linecap": "round" }, bog); paint(L.beam, "stroke", "--light");
+    L.sun = el("circle", { r: 17 }, bog); paint(L.sun, "fill", "--light");
+    L.sunlbl = el("text", { class: "lbl-sm" }, bog);
+    L.fire = el("g", {}, bog);
+    [[-22, 0.8], [-8, 1.1], [6, 0.9], [20, 0.7]].forEach(([dx, s]) => {
+      const f = el("path", { d: `M ${dx - 9 * s} 0 Q ${dx - 10 * s} ${-22 * s} ${dx} ${-40 * s} Q ${dx + 10 * s} ${-22 * s} ${dx + 9 * s} 0 Z` }, L.fire);
+      paint(f, "fill", "--burn");
+      const c = el("path", { d: `M ${dx - 4 * s} 0 Q ${dx - 5 * s} ${-12 * s} ${dx} ${-22 * s} Q ${dx + 5 * s} ${-12 * s} ${dx + 4 * s} 0 Z` }, L.fire);
+      paint(c, "fill", "--light");
+    });
+    L.firelbl = el("text", { x: 625, y: SURF + 18, "text-anchor": "middle", class: "lbl on-peat" }, bog);
+    L.firelbl.textContent = "Burning peat";
+  })();
+
+  const FLOWS = [
+    { id: "light", color: "--light", src: m => 80 * m.relQ },
+    { id: "co2in", color: "--co2", d: "M 80 26 L 80 128", src: m => m.P, label: ["CO₂ in", 80, 18] },
+    { id: "o2out", color: "--o2", d: "M 130 128 L 130 26", src: m => m.P, label: ["O₂ out", 130, 18] },
+    { id: "water", color: "--water", d: "M 40 300 L 40 160", src: m => m.P, label: ["Water", 48, 200, "start"] },
+    { id: "store", color: "--sugar", d: "M 300 156 L 300 300", src: m => m.P, label: ["Dead plants pile up as peat", 308, 296, "start"] },
+    { id: "o2dec", color: "--o2", d: "M 420 26 L 420 168", src: m => m.D, label: ["O₂ in", 420, 18] },
+    { id: "co2dec", color: "--co2", d: "M 490 168 L 490 26", src: m => m.D, label: ["CO₂ out", 490, 18] },
+    { id: "o2burn", color: "--o2", d: "M 590 26 L 590 100", src: m => m.B, label: ["O₂", 590, 18] },
+    { id: "co2burn", color: "--co2", d: "M 640 100 L 640 26", src: m => m.B, label: ["CO₂ + water", 646, 18] },
+    { id: "heat", color: "--burn", d: "M 660 112 L 694 70", src: m => m.B }
+  ];
+  const flowLayer = el("g", {}, bog), dotLayer = el("g", {}, bog), lblLayer = el("g", {}, bog);
+  FLOWS.forEach(f => {
+    f.el = el("path", { d: f.d || "M 0 0", fill: "none", "stroke-linecap": "round" }, flowLayer);
+    paint(f.el, "stroke", f.color); f.el.style.strokeOpacity = "0.3";
+    f.g = el("g", {}, dotLayer); f.dots = []; f.phase = Math.random(); f.rate = 0;
+    if (f.label) {
+      const t = el("text", { x: f.label[1], y: f.label[2], "text-anchor": f.label[3] || "middle", class: f.label[2] > SURF ? "lbl on-peat" : "lbl" }, lblLayer);
+      t.textContent = f.label[0];
+    }
+  });
+
+  function drawBog(m) {
+    const h = 90 - LAT + S.tilt;
+    const ax = 300, ay = SURF - 4, dist = 128;
+    const sx = ax - dist * Math.cos(h * RAD), sy = ay - dist * Math.sin(h * RAD);
+    L.sun.setAttribute("cx", sx); L.sun.setAttribute("cy", sy);
+    L.beam.setAttribute("x1", sx); L.beam.setAttribute("y1", sy); L.beam.setAttribute("x2", ax); L.beam.setAttribute("y2", ay);
+    L.beam.style.strokeOpacity = (0.15 + 0.3 * (m.relQ - 0.9) / 0.15).toFixed(2);
+    L.sunlbl.setAttribute("x", sx + 24); L.sunlbl.setAttribute("y", sy + 4);
+    L.sunlbl.textContent = `noon sun ${h.toFixed(1)}° high`;
+    FLOWS[0].el.setAttribute("d", `M ${sx} ${sy} L ${ax} ${ay}`);
+
+    const wy = SURF + 4 + (1 - S.wet / 100) * (BASE - SURF - 8);
+    L.water.setAttribute("y", wy); L.water.setAttribute("height", Math.max(0, BASE - wy));
+    L.wline.setAttribute("y1", wy); L.wline.setAttribute("y2", wy);
+    L.wlbl.setAttribute("y", wy - 5);
+    L.wlbl.textContent = "water level";
+    L.airLbl.setAttribute("y", wy - 8);
+    L.airLbl.textContent = wy > SURF + 40 ? "↑ air spaces with oxygen" : "";
+    L.wetLbl.setAttribute("y", wy + 18);
+    L.wetLbl.textContent = wy < BASE - 30 ? "↓ waterlogged, almost no oxygen" : "";
+    L.pores.forEach(c => { c.style.display = +c.getAttribute("cy") < wy - 3 && S.o2 > 0 ? "" : "none"; });
+    L.microbeEls.forEach(mc => { mc.style.opacity = +mc.getAttribute("cy") < wy ? "1" : "0.25"; });
+    const fireOn = m.B > 2;
+    L.embers.forEach(c => {
+      const d = +c.dataset.d, y = SURF + 6 + d * Math.max(0, wy - SURF - 10);
+      c.setAttribute("cy", y.toFixed(1));
+      c.style.display = fireOn && d < m.B / 60 + 0.2 ? "" : "none";
+    });
+    const ph = m.perm * (BASE - SURF - 10);
+    L.perm.setAttribute("y", BASE - ph); L.perm.setAttribute("height", ph);
+    L.plbl.setAttribute("y", Math.min(BASE - 6, BASE - ph + 18));
+    L.plbl.textContent = m.perm > 0.04 ? `Permafrost: ${Math.round(m.perm * 100)}% of peat frozen` : "";
+    L.plants.style.opacity = (0.35 + 0.65 * Math.min(1, m.P / 45)).toFixed(2);
+    L.microbes.style.opacity = (0.15 + 0.85 * Math.min(1, m.D / 40)).toFixed(2);
+    L.fire.setAttribute("transform", `translate(625 ${SURF}) scale(${(0.4 + m.B / 100 * 0.9).toFixed(2)})`);
+    L.fire.style.display = m.B > 0.5 ? "" : "none";
+    L.firelbl.style.display = m.B > 0.5 ? "" : "none";
+  }
+
+  function syncDots(f) {
+    const want = f.rate < 0.5 ? 0 : Math.max(1, Math.round(f.rate / 12));
+    while (f.dots.length < want) {
+      const c = el("circle", { r: 4.5 }, f.g); paint(c, "fill", f.color); f.dots.push(c);
+    }
+    while (f.dots.length > want) f.g.removeChild(f.dots.pop());
+  }
+  function placeDots() {
+    FLOWS.forEach(f => {
+      const n = f.dots.length; if (!n) return;
+      const len = f.el.getTotalLength();
+      for (let i = 0; i < n; i++) {
+        const p = f.el.getPointAtLength(((f.phase + i / n) % 1) * len);
+        f.dots[i].setAttribute("cx", p.x.toFixed(1));
+        f.dots[i].setAttribute("cy", p.y.toFixed(1));
+      }
+    });
+  }
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    FLOWS.forEach(f => { f.phase = (f.phase + dt * (0.05 + f.rate / 100 * 0.45)) % 1; });
+    placeDots();
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- notes ---------- */
+  function notes(m) {
+    const out = [], s = S, dq = (m.relQ - 1) * 100;
+    if (Math.abs(s.tilt - TILT_NOW) > 0.05) {
+      out.push(s.tilt > TILT_NOW
+        ? ["photo", "Bigger tilt", `In summer the Arctic leans further toward the sun. The noon sun is ${(s.tilt - TILT_NOW).toFixed(1)}° higher and the long summer days deliver ${dq.toFixed(1)}% more sunlight. Summers warm by about ${tiltWarming(s.tilt).toFixed(1)} °C, so plants grow faster and take in more carbon.`]
+        : ["ice", "Smaller tilt", `In summer the Arctic leans less toward the sun. The noon sun is ${(TILT_NOW - s.tilt).toFixed(1)}° lower and summer sunlight drops ${Math.abs(dq).toFixed(1)}%. Summers cool by about ${Math.abs(tiltWarming(s.tilt)).toFixed(1)} °C, so more ground stays frozen.`]);
+    }
+    if (m.perm > 0.04) out.push(["ice", "Permafrost", `About ${Math.round(m.perm * 100)}% of the peat is frozen. Decomposers can't break down frozen peat and fire can't burn it, so its carbon stays locked away. This is how cold Arctic peatlands became a carbon sink.`]);
+    if (m.T > 40) out.push(["warn", "Too hot", "Extreme heat damages the enzymes that plants and decomposers depend on."]);
+    if (m.P < 1) {
+      out.push(["photo", "Plants can't grow", m.T <= -2 ? "It is too cold for photosynthesis." : s.co2 <= 50 ? "There is not enough carbon dioxide for photosynthesis." : "Conditions are too harsh for photosynthesis."]);
+    } else {
+      const why = {
+        temp: m.T < 18 ? "Cool Arctic temperatures are slowing photosynthesis the most." : "It is past the best temperature for these plants.",
+        co2: "Carbon dioxide is limiting photosynthesis. More CO₂ would speed it up, until something else runs short.",
+        water: "Water is limiting photosynthesis. Bog mosses dry out and stop growing.",
+        light: "Sunlight is limiting photosynthesis."
+      };
+      let k = "temp", lo = 9;
+      for (const key in m.f) if (m.f[key] < lo) { lo = m.f[key]; k = key; }
+      out.push(["photo", "What limits plant growth", why[k]]);
+    }
+    const peatO2 = (s.o2 * (1 - 0.85 * s.wet / 100)).toFixed(0);
+    if (s.wet >= 60) out.push(["resp", "Water level high, oxygen low", `Water fills the air spaces in the peat, so only about ${peatO2}% oxygen reaches it (air has ${s.o2}%). Decomposers need oxygen for cellular respiration, so they work slowly. That is why dead plants pile up instead of rotting away.`]);
+    else if (s.wet <= 30) out.push(["warn", "Water level low, oxygen high", `Air fills the spaces in the dry peat, so about ${peatO2}% oxygen reaches it. Decomposers speed up, and fire has the oxygen it needs to burn down into the peat.`]);
+    else out.push(["resp", "Water level and oxygen", `About ${peatO2}% oxygen reaches the peat above the water level. Below the water level there is almost none.`]);
+    if (s.o2 < 5) out.push(["resp", "Very little oxygen", "Decomposers can't do aerobic respiration, so decomposition nearly stops."]);
+    if (s.burn > 0) {
+      if (m.B < 2) out.push(["warn", "The fire won't spread", s.o2 <= 12 ? "There isn't enough oxygen in the air to keep the fire going." : m.perm > 0.8 ? "Frozen peat won't burn." : "Wet peat barely burns."]);
+      else out.push(["warn", "Burning", "Fire uses the same inputs as decomposition (peat and oxygen) and makes the same outputs (CO₂ and water). Fire releases the stored energy in minutes as heat and light. Decomposers release it slowly over many years."]);
+    }
+    $("notes").innerHTML = out.map(([c, h, t]) => `<div class="note ${c}"><b>${h}.</b> ${t}</div>`).join("");
+  }
+
+  /* ---------- update ---------- */
+  function update() {
+    VARS.forEach(v => { $("o-" + v.key).textContent = v.fmt(S[v.key]); });
+    const m = model(S);
+    const dT = tiltWarming(S.tilt), dq = (m.relQ - 1) * 100;
+    $("effT").textContent = `With the tilt effect: ${m.T.toFixed(1)} °C`;
+    $("fSun").textContent = (90 - LAT + S.tilt).toFixed(1) + "°";
+    $("fQ").textContent = Math.round(m.q) + " W/m²";
+    $("fQd").textContent = (dq >= 0 ? "+" : "") + dq.toFixed(1) + "%";
+    $("fT").textContent = (dT >= 0 ? "+" : "") + dT.toFixed(1) + " °C";
+    const peatO2 = S.o2 * (1 - 0.85 * S.wet / 100);
+    $("o2Peat").textContent = peatO2.toFixed(1) + "%";
+    $("o2PeatBar").style.width = clamp(peatO2 / 35 * 100, 0, 100) + "%";
+    $("o2PeatTxt").textContent = `Air has ${S.o2}%. Water blocks oxygen from reaching most of the peat.`;
+    drawEarth();
+    drawBog(m);
+    updateZombie(m);
+    FLOWS.forEach(f => {
+      f.rate = f.src(m);
+      f.el.setAttribute("stroke-width", (1.5 + f.rate / 100 * 16).toFixed(1));
+      syncDots(f);
+    });
+    placeDots();
+    [["p", m.P], ["d", m.D], ["b", m.B]].forEach(([k, v]) => { $(k + "Val").textContent = v.toFixed(0); $(k + "Bar").style.width = v + "%"; });
+    const net = m.N;
+    $("nVal").textContent = (net > 0 ? "+" : "") + net.toFixed(0);
+    $("nVal").style.color = net > 1 ? "var(--photo)" : net < -1 ? "var(--burn)" : "var(--ink)";
+    const nb = $("nBar"), w = Math.min(50, Math.abs(net) / 2);
+    nb.style.left = net >= 0 ? "50%" : (50 - w) + "%";
+    nb.style.width = w + "%";
+    nb.style.background = net >= 0 ? "var(--photo)" : "var(--burn)";
+    $("nText").textContent = net > 1
+      ? "Carbon sink. Plants take in more carbon than decomposers and fire release, so peat builds up."
+      : net < -1
+        ? "Carbon source. More carbon is released than plants take in, so the peat is shrinking."
+        : "Balanced. The peat is neither growing nor shrinking.";
+    notes(m);
+    drawExplore();
+  }
+
+  /* ---------- zombie fires ---------- */
+  let season = 0, playTimer = null;
+  function zombie(m) {
+    const fire = clamp(m.B / 40, 0, 1);
+    const dry = clamp((1 - S.wet / 100) * 1.3, 0, 1);
+    const oxy = clamp(m.soilO2 / 0.6, 0, 1);
+    const thaw = 1 - m.perm;
+    const heat = clamp((m.T - 4) / 14, 0, 1);
+    const score = fire * dry * oxy * thaw * (0.4 + 0.6 * heat);
+    return { fire, dry, oxy, thaw, heat, chance: Math.round(clamp(score, 0, 0.95) * 100) };
+  }
+  function updateZombie(m) {
+    const z = zombie(m);
+    $("zChance").textContent = z.chance + "%";
+    const F = [["Fire burning now", z.fire], ["Dry peat to burn", z.dry], ["Oxygen in the peat", z.oxy], ["Thawed ground", z.thaw], ["Summer heat", z.heat]];
+    $("zFactors").innerHTML = F.map(([n, v]) => `<div class="flowbar"><span>${n}</span><div class="bar"><span style="width:${Math.round(v * 100)}%;background:var(${n.startsWith("Oxygen") ? "--o2" : "--burn"})"></span></div><span class="num">${Math.round(v * 100)}%</span></div>`).join("");
+    const weakest = F.slice().sort((a, b) => a[1] - b[1])[0];
+    const why = {
+      "Fire burning now": "There is no fire to survive the winter. Raise Burning above 0 in the bog controls.",
+      "Dry peat to burn": "The water level is high, so there is little dry peat for the fire to creep into.",
+      "Oxygen in the peat": "Water fills the air spaces in the peat, so the smoldering fire is smothered without oxygen.",
+      "Thawed ground": "Most of the peat is frozen. A fire can't burn into frozen peat.",
+      "Summer heat": "Cool summers don't dry the peat deeply enough."
+    };
+    $("zWhy").textContent = z.chance >= 50 ? "Dry, thawed, oxygen-rich peat lets the fire burrow deep enough to last the winter." : "Biggest obstacle: " + why[weakest[0]];
+    drawSeason(m, z);
+  }
+  function drawSeason(m, z) {
+    const svg = $("zsvg"); svg.innerHTML = "";
+    const top = 110, base = 270;
+    const alive = z.chance >= 50, winter = season === 2;
+    paint(el("rect", { x: 0, y: 0, width: 700, height: top }, svg), "fill", "--sky");
+    paint(el("rect", { x: 0, y: top, width: 700, height: base - top }, svg), "fill", "--peat");
+    paint(el("rect", { x: 0, y: base, width: 700, height: 300 - base }, svg), "fill", "--sunk");
+    const wy = top + 4 + (1 - S.wet / 100) * (base - top - 8);
+    const wr = el("rect", { x: 0, y: wy, width: 700, height: base - wy }, svg); paint(wr, "fill", "--water"); wr.style.fillOpacity = "0.22";
+    const wl = el("line", { x1: 0, x2: 700, y1: wy, y2: wy, "stroke-width": 2, "stroke-dasharray": "8 5" }, svg); paint(wl, "stroke", "--water");
+    el("text", { x: 694, y: wy - 5, "text-anchor": "end", class: "lbl-sm on-peat" }, svg).textContent = "water level";
+    const ph = m.perm * (base - top - 10);
+    if (ph > 1) el("rect", { x: 0, y: base - ph, width: 700, height: ph, fill: "url(#icehatch)" }, svg);
+    for (let x = 10; x < 700; x += 16) {
+      const mo = el("ellipse", { cx: x, cy: top - 2, rx: 9, ry: 4.5 }, svg); paint(mo, "fill", season === 0 || season === 3 ? "--photo" : "--resp");
+    }
+    const scar = el("rect", { x: 250, y: top - 6, width: 200, height: 8 }, svg); paint(scar, "fill", "--ink"); scar.style.fillOpacity = z.fire > 0.05 ? "0.6" : "0";
+    if (winter) {
+      const sn = el("rect", { x: 0, y: top - 22, width: 700, height: 22 }, svg); paint(sn, "fill", "--snow");
+      el("text", { x: 12, y: top - 30, class: "lbl" }, svg).textContent = "Snow insulates the ground";
+    }
+    // embers: deeper over the seasons
+    const depthFrac = [0.35, 0.65, 0.85, 0.6][season];
+    const emberAlive = z.fire > 0.05 && (season < 2 || alive);
+    let es = 5; const er = () => (es = (es * 9301 + 49297) % 233280) / 233280;
+    const n = Math.round(6 + z.fire * 26);
+    const maxD = Math.max(8, (wy - top) * depthFrac);
+    for (let i = 0; i < n; i++) {
+      const ex = 260 + er() * 180, ey = top + 6 + er() * maxD;
+      if (!emberAlive) continue;
+      const c = el("circle", { cx: ex.toFixed(1), cy: ey.toFixed(1), r: 3.2 }, svg);
+      paint(c, "fill", i % 3 ? "--burn" : "--light");
+      c.style.opacity = season === 2 ? 0.55 + 0.45 * (z.chance / 100) : 1;
+    }
+    if (emberAlive && season >= 1) {
+      const lab = el("text", { x: 350, y: Math.min(base - 8, top + maxD + 22), "text-anchor": "middle", class: "lbl on-peat" }, svg);
+      lab.textContent = season === 2 ? "Fire smoldering underground" : "Fire creeping into dry peat";
+    }
+    // oxygen seeping down through dry peat
+    if (emberAlive && season >= 1) {
+      [300, 350, 400].forEach(x => {
+        const a = el("line", { x1: x, y1: top - (winter ? 22 : 0) - 14, x2: x, y2: top + 10, "stroke-width": 2, "stroke-dasharray": "3 4" }, svg);
+        paint(a, "stroke", "--o2");
+      });
+      el("text", { x: 410, y: top - (winter ? 22 : 0) - 18, class: "lbl-sm" }, svg).textContent = "a little oxygen seeps in";
+    }
+    // flames
+    const flames = z.fire > 0.05 && (season === 0 || (season === 3 && alive));
+    if (flames) {
+      const g = el("g", { transform: `translate(350 ${top - 4}) scale(${(0.7 + z.fire * 0.6).toFixed(2)})` }, svg);
+      [-60, -30, 0, 30, 60].forEach((dx, i) => {
+        const s = [0.8, 1.1, 1.3, 1, 0.75][i];
+        paint(el("path", { d: `M ${dx - 10 * s} 0 Q ${dx - 11 * s} ${-24 * s} ${dx} ${-44 * s} Q ${dx + 11 * s} ${-24 * s} ${dx + 10 * s} 0 Z` }, g), "fill", "--burn");
+        paint(el("path", { d: `M ${dx - 4 * s} 0 Q ${dx - 5 * s} ${-12 * s} ${dx} ${-22 * s} Q ${dx + 5 * s} ${-12 * s} ${dx + 4 * s} 0 Z` }, g), "fill", "--light");
+      });
+    }
+    if (emberAlive && (season === 1 || season === 2)) {
+      [320, 380].forEach(x => {
+        const sm = el("path", { d: `M ${x} ${top - (winter ? 22 : 4)} q -10 -20 0 -40 q 10 -20 0 -40`, fill: "none", "stroke-width": 4, "stroke-linecap": "round" }, svg);
+        paint(sm, "stroke", "--co2"); sm.style.strokeOpacity = "0.5";
+      });
+      el("text", { x: 400, y: 30, class: "lbl-sm" }, svg).textContent = "a little smoke (CO₂) escapes";
+    }
+    el("text", { x: 12, y: 24, class: "lbl-b" }, svg).textContent = ["Summer", "Fall", "Winter", "Spring"][season];
+    const cap = [
+      z.fire > 0.05 ? "Summer: the fire burns at the surface. Where the peat is dry, air spaces let oxygen in, and the fire creeps downward into the peat." : "Summer: no fire is burning in this bog. Raise Burning in the bog controls to start one.",
+      z.fire > 0.05 ? "Fall: rain and cold put out the flames at the surface. Underground, the fire keeps smoldering in the dry peat, like a hot coal." : "Fall: no fire.",
+      z.fire < 0.05 ? "Winter: no fire." : alive
+        ? "Winter: snow covers the bog. Underneath, the fire smolders slowly, using the little oxygen that seeps through dry peat and burning the carbon stored in it. The snow keeps it insulated."
+        : "Winter: the underground fire runs out of oxygen or dry peat and goes out. " + (S.wet > 40 ? "Water filled the air spaces and smothered it." : ""),
+      z.fire < 0.05 ? "Spring: no fire returns." : alive
+        ? "Spring: the snow melts and the peat dries. The fire comes back to the surface and starts burning again. This is a zombie fire."
+        : "Spring: the fire stayed out. No zombie fire this year."
+    ][season];
+    $("zCaption").textContent = cap;
+    document.querySelectorAll("[data-season]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.season === season)));
+  }
+  document.querySelectorAll("[data-season]").forEach(b => b.addEventListener("click", () => {
+    clearInterval(playTimer); playTimer = null; season = +b.dataset.season; updateZombie(model(S));
+  }));
+  $("zPlay").addEventListener("click", () => {
+    clearInterval(playTimer); season = 0; updateZombie(model(S));
+    playTimer = setInterval(() => {
+      if (season >= 3) { clearInterval(playTimer); playTimer = null; return; }
+      season++; updateZombie(model(S));
+    }, 2600);
+  });
+  $("zSetup").addEventListener("click", () => { season = 0; setState(ZOMBIE); });
+
+  /* ---------- charts ---------- */
+  function niceStep(raw) {
+    const p = Math.pow(10, Math.floor(Math.log10(raw))); const n = raw / p;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
+  }
+  function ticks(min, max, n) {
+    const st = niceStep((max - min) / n); const out = [];
+    for (let v = Math.ceil(min / st - 1e-9) * st; v <= max + 1e-9; v += st) out.push(+v.toFixed(6));
+    return out;
+  }
+  function lineChart(svg, o) {
+    svg.innerHTML = "";
+    const vb = svg.viewBox.baseVal, W = vb.width, H = vb.height;
+    const m = { l: 46, r: 14, t: 12, b: o.xLabel ? 42 : 28 };
+    const X = v => m.l + (v - o.xMin) / (o.xMax - o.xMin) * (W - m.l - m.r);
+    const Y = v => H - m.b - (v - o.yMin) / (o.yMax - o.yMin) * (H - m.t - m.b);
+    const grid = el("g", { class: "grid" }, svg), axis = el("g", { class: "axis" }, svg);
+    ticks(o.yMin, o.yMax, o.yTicks || 5).forEach(t => {
+      el("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t) }, grid);
+      el("text", { x: m.l - 6, y: Y(t) + 4, "text-anchor": "end" }, axis).textContent = o.yFmt ? o.yFmt(t) : t;
+    });
+    ticks(o.xMin, o.xMax, o.xTicks || 6).forEach(t => {
+      el("text", { x: X(t), y: H - m.b + 16, "text-anchor": "middle" }, axis).textContent = o.xFmt ? o.xFmt(t) : t;
+    });
+    el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, axis);
+    if (o.xLabel) el("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle", class: "axis-title" }, svg).textContent = o.xLabel;
+    if (o.yLabel) el("text", { x: 12, y: (m.t + H - m.b) / 2, "text-anchor": "middle", class: "axis-title", transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})` }, svg).textContent = o.yLabel;
+    (o.refs || []).forEach(r => {
+      if (r.y > o.yMax) return;
+      const l = el("line", { x1: m.l, x2: W - m.r, y1: Y(r.y), y2: Y(r.y), "stroke-dasharray": "5 4", "stroke-width": 1.2 }, svg);
+      paint(l, "stroke", "--heat");
+      const t = el("text", { x: W - m.r - 4, y: Y(r.y) - 5, "text-anchor": "end", class: "axis-title" }, svg);
+      t.textContent = r.label; paint(t, "fill", "--heat");
+    });
+    o.series.forEach(s => {
+      if (s.area) {
+        const a = el("path", { d: `M ${X(o.x[0])} ${Y(o.yMin)} ` + o.x.map((x, i) => `L ${X(x).toFixed(1)} ${Y(s.y[i]).toFixed(1)}`).join(" ") + ` L ${X(o.x[o.x.length - 1])} ${Y(o.yMin)} Z` }, svg);
+        paint(a, "fill", s.color); a.style.fillOpacity = "0.12";
+      }
+      const p = el("path", { d: o.x.map((x, i) => `${i ? "L" : "M"} ${X(x).toFixed(1)} ${Y(s.y[i]).toFixed(1)}`).join(" "), fill: "none", "stroke-width": 3, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+      paint(p, "stroke", s.color);
+    });
+    if (o.marker != null) {
+      const mk = el("line", { x1: X(o.marker), x2: X(o.marker), y1: m.t, y2: H - m.b, "stroke-dasharray": "4 4", "stroke-width": 1.5 }, svg);
+      paint(mk, "stroke", "--ink");
+      o.series.forEach(s => {
+        if (s.markY == null) return;
+        const c = el("circle", { cx: X(o.marker), cy: Y(s.markY), r: 5.5, "stroke-width": 2.5 }, svg);
+        paint(c, "fill", "--surface"); paint(c, "stroke", s.color);
+      });
+    }
+  }
+
+  function drawExplore() {
+    const v = VARS.find(x => x.key === xSel.value);
+    const xs = [], P = [], D = [], B = [], n = 120;
+    for (let i = 0; i <= n; i++) {
+      const x = v.min + (v.max - v.min) * i / n;
+      const m = model(Object.assign({}, S, { [v.key]: x }));
+      xs.push(x); P.push(m.P); D.push(m.D); B.push(m.B);
+    }
+    const cur = model(S);
+    lineChart($("explore"), {
+      x: xs, xMin: v.min, xMax: v.max, yMin: 0, yMax: 100,
+      xFmt: v.key === "tilt" ? t => t.toFixed(1) : null, xTicks: v.key === "tilt" ? 5 : 6,
+      xLabel: `${v.label} (${v.unit})`, yLabel: "Rate (0–100)",
+      series: [{ y: P, color: "--photo", markY: cur.P }, { y: D, color: "--resp", markY: cur.D }, { y: B, color: "--burn", markY: cur.B }],
+      marker: S[v.key]
+    });
+  }
+
+  /* ---------- data log ---------- */
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem("peatlab-log") || "[]"); } catch (e) { log = []; }
+  const COLS = [["#", r => r.n], ["Tilt °", r => r.tilt.toFixed(2)], ["Temp °C", r => r.Teff], ["CO₂ ppm", r => r.co2], ["O₂ %", r => r.o2], ["Water %", r => r.wet], ["Burning %", r => r.burn], ["Photosynthesis", r => r.P, "p"], ["Decomposition", r => r.D, "r"], ["Fire", r => r.B, "b"], ["Permafrost %", r => r.perm], ["Net", r => (r.N > 0 ? "+" : "") + r.N]];
+  function saveLog() { try { localStorage.setItem("peatlab-log", JSON.stringify(log)); } catch (e) {} }
+  function renderLog() {
+    if (!log.length) { $("logWrap").innerHTML = '<div class="empty">No trials yet. Set up the bog, then choose Record this trial.</div>'; return; }
+    $("logWrap").innerHTML = "<table><thead><tr>" + COLS.map(c => `<th scope="col">${c[0]}</th>`).join("") + "</tr></thead><tbody>" +
+      log.map(r => "<tr>" + COLS.map(c => `<td${c[2] ? ` class="${c[2]}"` : ""}>${c[1](r)}</td>`).join("") + "</tr>").join("") + "</tbody></table>";
+  }
+  $("record").addEventListener("click", () => {
+    const m = model(S);
+    log.push(Object.assign({ n: log.length + 1 }, S, { Teff: m.T.toFixed(1), P: Math.round(m.P), D: Math.round(m.D), B: Math.round(m.B), perm: Math.round(m.perm * 100), N: Math.round(m.N) }));
+    saveLog(); renderLog();
+    $("logStatus").textContent = `Recorded trial ${log.length}.`;
+  });
+  $("clear").addEventListener("click", () => { log = []; saveLog(); renderLog(); $("logStatus").textContent = "Table cleared."; });
+  $("copy").addEventListener("click", () => {
+    if (!log.length) { $("logStatus").textContent = "Record at least one trial before copying."; return; }
+    const txt = [COLS.map(c => c[0]).join("\t")].concat(log.map(r => COLS.map(c => c[1](r)).join("\t"))).join("\n");
+    const fallback = () => {
+      const t = $("logWrap").querySelector("table");
+      if (t) { const rg = document.createRange(); rg.selectNodeContents(t); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); }
+      $("logStatus").textContent = "The table is selected. Press Ctrl+C (or ⌘+C) to copy it.";
+    };
+    try {
+      navigator.clipboard.writeText(txt).then(() => { $("logStatus").textContent = "Copied. Paste it into a spreadsheet or document."; }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  /* ---------- climate ---------- */
+  const Y0 = 2025, Y1 = 2100;
+  function climate(fossil, forest) {
+    let C = 425; const rows = [];
+    for (let y = Y0; y <= Y1; y++) {
+      const land = 0.018 * (C - 280) * forest / 100;
+      const ocean = 0.018 * (C - 280);
+      const clear = forest < 100 ? 0.03 * (100 - forest) : 0;
+      const T = 2.0 * Math.log2(C / 280);
+      rows.push({ y, C, T, fossil, clear, land: Math.max(0, land), ocean: Math.max(0, ocean) });
+      C = Math.max(280, C + (fossil + clear - land - ocean) / 2.12);
+    }
+    return rows;
+  }
+  function wave(x, y0, y1, amp) {
+    const pts = []; const n = 40;
+    for (let i = 0; i <= n; i++) { const t = i / n; const y = y0 + (y1 - y0) * t; pts.push(`${i ? "L" : "M"} ${(x + Math.sin(t * Math.PI * 6) * amp).toFixed(1)} ${y.toFixed(1)}`); }
+    return pts.join(" ");
+  }
+  function drawGreenhouse(row) {
+    const svg = $("gh"); svg.innerHTML = "";
+    const defs = el("defs", {}, svg);
+    ["heat", "light"].forEach(k => {
+      const mk = el("marker", { id: "ah-" + k, viewBox: "0 0 10 10", refX: 5, refY: 5, markerWidth: 5, markerHeight: 5, orient: "auto-start-reverse" }, defs);
+      paint(el("path", { d: "M 0 0 L 10 5 L 0 10 z" }, mk), "fill", "--" + k);
+    });
+    paint(el("rect", { x: 0, y: 0, width: 600, height: 300, rx: 8 }, svg), "fill", "--sky");
+    const band = el("rect", { x: 0, y: 70, width: 600, height: 70 }, svg);
+    paint(band, "fill", "--co2"); band.style.fillOpacity = (0.08 + 0.45 * clamp((row.C - 280) / 1100, 0, 1)).toFixed(2);
+    const nMol = Math.round(row.C / 25);
+    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    for (let i = 0; i < nMol; i++) paint(el("circle", { cx: (rnd() * 590 + 5).toFixed(1), cy: (74 + rnd() * 62).toFixed(1), r: 2.6 }, svg), "fill", "--co2");
+    el("text", { x: 140, y: 62, class: "lbl-sm" }, svg).textContent = `atmosphere · ${Math.round(row.C)} ppm CO₂`;
+    paint(el("circle", { cx: 52, cy: 38, r: 22 }, svg), "fill", "--light");
+    [150, 215, 280].forEach(gx => paint(el("line", { x1: 70, y1: 52, x2: gx, y2: 236, "stroke-width": 3, "marker-end": "url(#ah-light)" }, svg), "stroke", "--light"));
+    el("text", { x: 92, y: 178, class: "lbl" }, svg).textContent = "Sunlight";
+    paint(el("path", { d: "M 0 248 Q 300 232 600 248 L 600 300 L 0 300 Z" }, svg), "fill", "--ground");
+    el("text", { x: 16, y: 284, class: "lbl" }, svg).textContent = "Ground warms up";
+    const N = 6;
+    const trapped = clamp(Math.round(N * (0.2 + 0.3 * Math.log2(row.C / 280))), 1, N);
+    for (let i = 0; i < N; i++) {
+      const x = 410 + i * 33;
+      if (i < trapped) {
+        paint(el("path", { d: wave(x, 236, 110, 4), fill: "none", "stroke-width": 2.5 }, svg), "stroke", "--heat");
+        paint(el("path", { d: wave(x + 16, 112, 232, 3), fill: "none", "stroke-width": 2, "stroke-dasharray": "4 3", "marker-end": "url(#ah-heat)" }, svg), "stroke", "--heat");
+      } else {
+        const up = el("path", { d: wave(x, 236, 14, 4), fill: "none", "stroke-width": 2.5, "marker-end": "url(#ah-heat)" }, svg);
+        paint(up, "stroke", "--heat"); up.style.strokeOpacity = "0.55";
+      }
+    }
+    el("text", { x: 395, y: 30, "text-anchor": "end", class: "lbl" }, svg).textContent = `Heat escaping to space: ${N - trapped} of ${N}`;
+    el("text", { x: 395, y: 172, "text-anchor": "end", class: "lbl" }, svg).textContent = `Heat sent back down: ${trapped} of ${N}`;
+    const tt = el("text", { x: 84, y: 34, class: "lbl-b" }, svg);
+    tt.textContent = `${row.y}: +${row.T.toFixed(1)} °C`; paint(tt, "fill", "--heat");
+  }
+
+  let rows = [];
+  function updateClimate() {
+    const fossil = +$("fossil").value, forest = +$("forest").value, year = +$("year").value;
+    $("fossilOut").textContent = fossil.toFixed(1) + " Gt";
+    $("forestOut").textContent = forest + "% of today";
+    $("yearOut").textContent = year;
+    rows = climate(fossil, forest);
+    const row = rows[year - Y0];
+    [["fossil", row.fossil], ["clear", row.clear], ["land", row.land], ["ocean", row.ocean]].forEach(([k, v]) => {
+      $("b-" + k).style.width = clamp(v / 20 * 100, 0, 100) + "%";
+      $("n-" + k).textContent = v.toFixed(1);
+    });
+    const dC = (row.fossil + row.clear - row.land - row.ocean) / 2.12;
+    $("balanceText").textContent = dC > 0.05
+      ? `More carbon goes in than comes out, so CO₂ in the air rises about ${dC.toFixed(1)} ppm per year.`
+      : dC < -0.05
+        ? `Plants and oceans remove more than is added, so CO₂ in the air falls about ${Math.abs(dC).toFixed(1)} ppm per year.`
+        : "Carbon in and carbon out are balanced, so CO₂ in the air holds steady.";
+    drawGreenhouse(row);
+    const xs = rows.map(r => r.y), Cs = rows.map(r => r.C), Ts = rows.map(r => r.T);
+    const cMax = Math.max(500, Math.ceil(Math.max(...Cs) / 100) * 100);
+    lineChart($("c-co2"), { x: xs, xMin: Y0, xMax: Y1, yMin: 250, yMax: cMax, xTicks: 4, yTicks: 4, series: [{ y: Cs, color: "--co2", area: true, markY: row.C }], marker: year });
+    const tMax = Math.max(3, Math.ceil(Math.max(...Ts)));
+    lineChart($("c-temp"), { x: xs, xMin: Y0, xMax: Y1, yMin: 0, yMax: tMax, xTicks: 4, yTicks: 4, yFmt: t => t.toFixed(1).replace(".0", ""),
+      refs: [{ y: 1.5, label: "1.5 °C goal" }, { y: 2, label: "2 °C limit" }],
+      series: [{ y: Ts, color: "--heat", area: true, markY: row.T }], marker: year });
+  }
+  ["fossil", "forest", "year"].forEach(id => $(id).addEventListener("input", updateClimate));
+  $("sendBog").addEventListener("click", () => {
+    const year = +$("year").value, row = rows[year - Y0];
+    const arcticWarm = 2.5 * (row.T - rows[0].T);
+    setState({ co2: Math.round(row.C / 10) * 10, temp: clamp(Math.round(DEFAULTS.temp + arcticWarm), -5, 30), tilt: TILT_NOW });
+    $("lab-h").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  });
+
+  update();
+  renderLog();
+  updateClimate();
+  if (!reduceMotion) requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
