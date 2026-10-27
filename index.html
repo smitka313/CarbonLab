@@ -93,7 +93,7 @@ section { display: flex; flex-direction: column; gap: 16px; }
 .ctrl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .ctrl label { font-weight: 700; font-size: 0.95rem; }
 .ctrl output { font-family: var(--f-mono); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.ctrl .hint { font-size: 0.8rem; color: var(--muted); }
+.ctrl .hint { font-size: 0.85rem; color: var(--muted); }
 input[type="range"] { --pct: 50%; width: 100%; margin: 4px 0 0; height: 34px; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; touch-action: pan-y; }
 input[type="range"]::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--photo) 0 var(--pct), var(--line) var(--pct) 100%); }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -9px; border-radius: 50%; background: var(--photo); border: 3px solid var(--surface); box-shadow: 0 0 0 1.5px var(--photo), 0 1px 3px rgba(0,0,0,.25); }
@@ -257,6 +257,35 @@ html { scroll-behavior: smooth; }
 .btn.danger { background: var(--burn); border-color: var(--burn); color: #fff; }
 .btn:disabled { opacity: .5; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .delta { transition: none; } }
+/* top cards: inputs on one line, arrow + outputs on the next */
+.io { flex-direction: column; align-items: flex-start; }
+.io-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.io .arrow { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+/* label halos in the pictures */
+#bog text, #zsvg text { paint-order: stroke; stroke-linejoin: round; stroke-width: 3px; stroke: var(--sky); }
+#bog text.on-peat, #zsvg text.on-peat { stroke: rgba(30, 18, 8, 0.8); }
+/* bigger picture while pinned on laptops */
+@media (min-width: 901px) {
+  .lab .meter:not(:last-child) p { display: none; }
+  .lab > .stage #bog { max-height: calc(100vh - 285px); }
+  .lab .legend .chip { font-size: 0.8rem; padding: 1px 8px; }
+}
+/* phones: bog picture scrolls sideways at a readable size */
+.swipe { display: none; font-size: 0.85rem; color: var(--muted); margin: 2px 4px 6px; }
+@media (max-width: 640px) {
+  .swipe { display: block; }
+  .bog-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+  .bog-scroll #bog { width: 640px; max-width: none; }
+  /* opposite reactions chart fits the screen */
+  .mirror-scroll { overflow-x: visible; }
+  .mgrid { min-width: 0; grid-template-columns: repeat(3, minmax(0, 1fr)) 22px repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .mgrid > span { display: none; }
+  .mgrid .rl { grid-column: 1 / -1; flex-direction: row; align-items: baseline; gap: 8px; margin-top: 6px; }
+  .cell { font-size: 0.72rem; padding: 6px 3px; gap: 0; line-height: 1.2; justify-content: center; text-align: center; overflow-wrap: normal; hyphens: none; }
+  .cell i { display: none; }
+  .cell.plus::after { content: none; }
+  .big-arrow { font-size: 1.3rem; }
+}
 </style>
 </head>
 <body>
@@ -287,17 +316,17 @@ html { scroll-behavior: smooth; }
     <div class="key-compare">
       <div class="proc">
         <h3><span class="dot" style="background: var(--photo)"></span>Photosynthesis · bog plants</h3>
-        <div class="io"><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--light)"></i>Sunlight</span><span class="arrow">→</span><span class="chip"><i style="background: var(--sugar)"></i>Glucose</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span></div>
+        <div class="io"><div class="io-row"><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--light)"></i>Sunlight</span></div><div class="io-row"><span class="arrow" aria-label="makes">→</span><span class="chip"><i style="background: var(--sugar)"></i>Glucose</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span></div></div>
         <p class="status">Mosses and sedges store carbon in glucose and plant tissue. Dead plants become peat.</p>
       </div>
       <div class="proc">
         <h3><span class="dot" style="background: var(--resp)"></span>Decomposition · cellular respiration</h3>
-        <div class="io"><span class="chip"><i style="background: var(--sugar)"></i>Peat (glucose)</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span><span class="arrow">→</span><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--resp)"></i>Energy</span></div>
+        <div class="io"><div class="io-row"><span class="chip"><i style="background: var(--sugar)"></i>Peat (glucose)</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span></div><div class="io-row"><span class="arrow" aria-label="makes">→</span><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--resp)"></i>Energy</span></div></div>
         <p class="status">Bacteria and fungi break down peat slowly to get energy.</p>
       </div>
       <div class="proc">
         <h3><span class="dot" style="background: var(--burn)"></span>Burning · combustion</h3>
-        <div class="io"><span class="chip"><i style="background: var(--sugar)"></i>Peat (fuel)</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span><span class="arrow">→</span><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--burn)"></i>Heat &amp; light</span></div>
+        <div class="io"><div class="io-row"><span class="chip"><i style="background: var(--sugar)"></i>Peat (fuel)</span><span class="chip"><i style="background: var(--o2)"></i>Oxygen</span></div><div class="io-row"><span class="arrow" aria-label="makes">→</span><span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span><span class="chip"><i style="background: var(--water)"></i>Water</span><span class="chip"><i style="background: var(--burn)"></i>Heat &amp; light</span></div></div>
         <p class="status">Same inputs and outputs as respiration, but the energy comes out all at once.</p>
       </div>
     </div>
@@ -354,7 +383,8 @@ html { scroll-behavior: smooth; }
 
       <div class="stage">
         <div class="diagram">
-          <svg id="bog" viewBox="0 0 700 400" role="img" aria-label="Cross-section of a peat bog. Arrows show carbon dioxide and oxygen moving between the air, the plants, the decomposers in the peat, and any fire. Thicker, faster arrows mean a faster rate."></svg>
+          <p class="swipe">Swipe sideways to see the whole bog →</p>
+          <div class="bog-scroll"><svg id="bog" viewBox="0 0 700 400" role="img" aria-label="Cross-section of a peat bog. Arrows show carbon dioxide and oxygen moving between the air, the plants, the decomposers in the peat, and any fire. Thicker, faster arrows mean a faster rate."></svg></div>
           <div class="legend" aria-hidden="true">
             <span class="chip"><i style="background: var(--light)"></i>Sunlight</span>
             <span class="chip"><i style="background: var(--co2)"></i>Carbon dioxide</span>
@@ -722,12 +752,12 @@ html { scroll-behavior: smooth; }
       const c = el("circle", { cx: (560 + pr() * 130).toFixed(1), cy: 0, r: 3 }, bog);
       paint(c, "fill", "--burn"); c.dataset.d = pr().toFixed(3); L.embers.push(c);
     }
-    L.airLbl = el("text", { x: 54, class: "lbl on-peat" }, bog);
-    L.wetLbl = el("text", { x: 54, class: "lbl on-peat" }, bog);
+    L.airLbl = el("text", { x: 100, class: "lbl on-peat" }, bog);
+    L.wetLbl = el("text", { x: 100, class: "lbl on-peat" }, bog);
     L.perm = el("rect", { x: 0, width: 700, fill: "url(#icehatch)" }, bog);
     L.plbl = el("text", { x: 694, "text-anchor": "end", class: "lbl-b" }, bog); paint(L.plbl, "fill", "--o2");
-    el("text", { x: 196, y: 186, class: "lbl-sm on-peat" }, bog).textContent = "young peat (recent dead plants)";
-    el("text", { x: 196, y: 338, class: "lbl-sm on-peat" }, bog).textContent = "old peat (thousands of years old)";
+    el("text", { x: 312, y: 182, class: "lbl-sm on-peat" }, bog).textContent = "young peat (recent dead plants)";
+    el("text", { x: 312, y: 338, class: "lbl-sm on-peat" }, bog).textContent = "old peat (thousands of years old)";
     let seed = 3; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
     L.microbes = el("g", {}, bog);
     for (let i = 0; i < 26; i++) {
@@ -746,7 +776,7 @@ html { scroll-behavior: smooth; }
         paint(sedge, "stroke", "--photo");
       }
     }
-    el("text", { x: 60, y: SURF + 18, class: "lbl on-peat" }, bog).textContent = "Sphagnum moss and sedges";
+    el("text", { x: 100, y: SURF + 18, class: "lbl on-peat" }, bog).textContent = "Sphagnum moss and sedges";
     L.beam = el("line", { "stroke-width": 26, "stroke-linecap": "round" }, bog); paint(L.beam, "stroke", "--light");
     L.sun = el("circle", { r: 17 }, bog); paint(L.sun, "fill", "--light");
     L.sunlbl = el("text", { class: "lbl-sm" }, bog);
@@ -765,7 +795,7 @@ html { scroll-behavior: smooth; }
     { id: "light", color: "--light", src: m => 80 * m.relQ },
     { id: "co2in", color: "--co2", d: "M 80 26 L 80 128", src: m => m.P, label: ["CO₂ in", 80, 18] },
     { id: "o2out", color: "--o2", d: "M 130 128 L 130 26", src: m => m.P, label: ["O₂ out", 130, 18] },
-    { id: "water", color: "--water", d: "M 40 300 L 40 160", src: m => m.P, label: ["Water", 48, 200, "start"] },
+    { id: "water", color: "--water", d: "M 40 300 L 40 160", src: m => m.P, label: ["Water", 48, 182, "start"] },
     { id: "store", color: "--sugar", d: "M 300 156 L 300 300", src: m => m.P, label: ["Dead plants pile up as peat", 308, 296, "start"] },
     { id: "o2dec", color: "--o2", d: "M 420 26 L 420 168", src: m => m.D, label: ["O₂ in", 420, 18] },
     { id: "co2dec", color: "--co2", d: "M 490 168 L 490 26", src: m => m.D, label: ["CO₂ out", 490, 18] },
@@ -1119,7 +1149,7 @@ html { scroll-behavior: smooth; }
       if (r.y > o.yMax) return;
       const l = el("line", { x1: m.l, x2: W - m.r, y1: Y(r.y), y2: Y(r.y), "stroke-dasharray": "5 4", "stroke-width": 1.2 }, svg);
       paint(l, "stroke", "--heat");
-      const t = el("text", { x: W - m.r - 4, y: Y(r.y) - 5, "text-anchor": "end", class: "axis-title" }, svg);
+      const t = el("text", { x: m.l + 6, y: Y(r.y) - 5, "text-anchor": "start", class: "axis-title" }, svg);
       t.textContent = r.label; paint(t, "fill", "--heat");
     });
     o.series.forEach(s => {
