@@ -270,6 +270,36 @@ html { scroll-behavior: smooth; }
   .lab > .stage #bog { max-height: calc(100vh - 285px); }
   .lab .legend .chip { font-size: 0.8rem; padding: 1px 8px; }
 }
+/* small laptops: narrower control panel */
+@media (min-width: 901px) and (max-width: 1150px) {
+  .lab, .zombie, .climate { grid-template-columns: 300px minmax(0, 1fr); }
+}
+/* short laptop screens */
+@media (min-width: 901px) {
+  #zsvg { max-height: calc(100vh - 240px); min-height: 200px; }
+  #gh { max-height: calc(100vh - 200px); min-height: 220px; }
+}
+.seasons { scroll-margin-top: 56px; }
+@media (max-height: 760px) {
+  .jump-inner { padding-block: 4px; }
+  .jump a { padding: 4px 10px; font-size: 0.8rem; }
+  .jump .brand { font-size: 0.92rem; }
+  h2[id] { scroll-margin-top: 50px; }
+}
+@media (min-width: 901px) and (max-height: 760px) {
+  .lab > .stage { top: 48px; max-height: calc(100vh - 56px); gap: 10px; }
+  .lab > .stage #bog { max-height: calc(100vh - 200px); }
+  .lab .diagram { padding: 8px; }
+  .lab .legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 6px 2px 0; gap: 4px; }
+  .lab .legend::-webkit-scrollbar { display: none; }
+  .lab .legend .chip { font-size: 0.72rem; padding: 1px 7px; }
+  .lab .meters { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .lab .meter { padding: 6px 10px; gap: 3px; }
+  .lab .meter .val { font-size: 1.35rem; }
+  .lab .meter .bar { height: 6px; }
+  .lab .meter p, .lab .meters .meter:last-child > .unit { display: none; }
+  .lab .meter .sub { font-size: 0.66rem; }
+}
 /* phones: bog picture scrolls sideways at a readable size */
 .swipe { display: none; font-size: 0.85rem; color: var(--muted); margin: 2px 4px 6px; }
 @media (max-width: 640px) {
@@ -1110,6 +1140,9 @@ html { scroll-behavior: smooth; }
     clearInterval(playTimer); playTimer = null; season = +b.dataset.season; updateZombie(model(S));
   }));
   $("zPlay").addEventListener("click", () => {
+    const top = document.querySelector(".seasons").getBoundingClientRect().top;
+    const capBottom = $("zCaption").parentElement.getBoundingClientRect().bottom;
+    if (top < 50 || capBottom > innerHeight) document.querySelector(".seasons").scrollIntoView({ block: "start" });
     clearInterval(playTimer); season = 0; updateZombie(model(S));
     playTimer = setInterval(() => {
       if (season >= 3) { clearInterval(playTimer); playTimer = null; return; }
