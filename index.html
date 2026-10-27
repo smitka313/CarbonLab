@@ -7,7 +7,7 @@
 <title>Peat Bog Carbon Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Lexend:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: field station — control panel beside a live bog cross-section, then a graph, a data log, and a climate panel */
 :root {
@@ -34,7 +34,7 @@
   --snow: #ffffff;
   --focus: #2a78bd;
   --f-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --f-body: "Atkinson Hyperlegible", "Segoe UI", Verdana, sans-serif;
+  --f-body: "Lexend", "Segoe UI", Verdana, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
@@ -787,7 +787,7 @@ html { scroll-behavior: smooth; }
     L.perm = el("rect", { x: 0, width: 700, fill: "url(#icehatch)" }, bog);
     L.plbl = el("text", { x: 694, "text-anchor": "end", class: "lbl-b" }, bog); paint(L.plbl, "fill", "--o2");
     el("text", { x: 312, y: 182, class: "lbl-sm on-peat" }, bog).textContent = "young peat (recent dead plants)";
-    el("text", { x: 312, y: 338, class: "lbl-sm on-peat" }, bog).textContent = "old peat (thousands of years old)";
+    el("text", { x: 312, y: 338, class: "lbl-sm on-peat" }, bog).textContent = "old peat: 1000s of years old";
     let seed = 3; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
     L.microbes = el("g", {}, bog);
     for (let i = 0; i < 26; i++) {
@@ -796,7 +796,7 @@ html { scroll-behavior: smooth; }
     }
     L.microbeEls = Array.from(L.microbes.children);
     el("text", { x: 455, y: 202, "text-anchor": "middle", class: "lbl on-peat" }, bog).textContent = "Decomposers";
-    el("text", { x: 455, y: 216, "text-anchor": "middle", class: "lbl-sm on-peat" }, bog).textContent = "bacteria and fungi";
+    el("text", { x: 455, y: 219, "text-anchor": "middle", class: "lbl-sm on-peat" }, bog).textContent = "bacteria and fungi";
     L.plants = el("g", {}, bog);
     for (let x = 12; x < 560; x += 15) {
       const h = 10 + ((x * 7) % 11);
@@ -859,11 +859,11 @@ html { scroll-behavior: smooth; }
     L.water.setAttribute("y", wy); L.water.setAttribute("height", Math.max(0, BASE - wy));
     L.wline.setAttribute("y1", wy); L.wline.setAttribute("y2", wy);
     L.wlbl.setAttribute("y", wy - 5);
-    L.wlbl.textContent = "water level";
+    L.wlbl.textContent = wy > BASE - 40 ? "" : "water level";
     L.airLbl.setAttribute("y", wy - 8);
     L.airLbl.textContent = wy > SURF + 40 ? "↑ air spaces with oxygen" : "";
-    L.wetLbl.setAttribute("y", wy + 18);
-    L.wetLbl.textContent = wy < BASE - 30 ? "↓ waterlogged, almost no oxygen" : "";
+    L.wetLbl.setAttribute("y", Math.max(wy + 18, SURF + 56));
+    L.wetLbl.textContent = wy < BASE - 30 ? "↓ waterlogged, little oxygen" : "";
     L.pores.forEach(c => { c.style.display = +c.getAttribute("cy") < wy - 3 && S.o2 > 0 ? "" : "none"; });
     L.microbeEls.forEach(mc => { mc.style.opacity = +mc.getAttribute("cy") < wy ? "1" : "0.25"; });
     const fireOn = m.B > 2;
