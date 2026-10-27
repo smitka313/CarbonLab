@@ -94,7 +94,13 @@ section { display: flex; flex-direction: column; gap: 16px; }
 .ctrl label { font-weight: 700; font-size: 0.95rem; }
 .ctrl output { font-family: var(--f-mono); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ctrl .hint { font-size: 0.8rem; color: var(--muted); }
-input[type="range"] { width: 100%; accent-color: var(--photo); margin: 4px 0 0; height: 24px; }
+input[type="range"] { --pct: 50%; width: 100%; margin: 4px 0 0; height: 34px; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; touch-action: pan-y; }
+input[type="range"]::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--photo) 0 var(--pct), var(--line) var(--pct) 100%); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -9px; border-radius: 50%; background: var(--photo); border: 3px solid var(--surface); box-shadow: 0 0 0 1.5px var(--photo), 0 1px 3px rgba(0,0,0,.25); }
+input[type="range"]::-moz-range-track { height: 8px; border-radius: 4px; background: var(--line); }
+input[type="range"]::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--photo); }
+input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--photo); border: 3px solid var(--surface); box-shadow: 0 0 0 1.5px var(--photo); }
+input[type="range"]:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
 select, button { font: inherit; }
 select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--sunk); color: var(--ink); cursor: pointer; font-weight: 700; font-size: 0.9rem; }
@@ -123,7 +129,7 @@ svg .on-peat { fill: #f4ead9; }
 
 .meters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 1100px) { .meters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 480px) { .meters { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 480px) { .meter { padding: 10px 12px; } .meter .val { font-size: 1.6rem; } .meter p { font-size: 0.78rem; } }
 .meter { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
 .meter .val { font-family: var(--f-display); font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
 .meter .unit { font-family: var(--f-mono); font-size: 0.75rem; color: var(--muted); }
@@ -196,12 +202,67 @@ td.b { color: var(--burn); font-weight: 700; }
 .seasons .btn { font-weight: 400; }
 .seasons .btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .caption { font-size: 0.95rem; padding: 10px 14px; border-radius: 10px; background: var(--sunk); border-left: 4px solid var(--burn); min-height: 3.2em; }
-@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+/* jump menu */
+.jump { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--bg); }
+.jump-inner { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px; display: flex; gap: 6px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+.jump-inner::-webkit-scrollbar { display: none; }
+.jump .brand { font-family: var(--f-display); font-weight: 700; margin-right: 6px; white-space: nowrap; }
+.jump a { white-space: nowrap; text-decoration: none; color: var(--ink); font-size: 0.88rem; padding: 6px 12px; border-radius: 999px; background: var(--sunk); border: 1px solid var(--line); }
+.jump a:hover { border-color: var(--muted); }
+.jump a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+h2[id] { scroll-margin-top: 64px; }
+/* keep the bog picture and numbers on screen while the controls scroll */
+@media (min-width: 901px) {
+  .lab > .stage { position: sticky; top: 60px; max-height: calc(100vh - 72px); overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+  .lab > .stage #bog { max-height: calc(100vh - 350px); min-height: 220px; }
+  .lab .meter p { font-size: 0.78rem; }
+  .lab .meter { padding: 10px 14px; gap: 6px; }
+  .lab .meter .val { font-size: 1.7rem; }
+}
+/* phone: slim bar with the four numbers */
+.numbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -2px 8px rgba(0,0,0,.08);
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; text-align: center; }
+.numbar div { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
+.numbar small { font-family: var(--f-mono); font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.numbar b { font-family: var(--f-display); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+@media (min-width: 901px) { .numbar { display: none !important; } }
+/* active buttons and status message */
+.presets .btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.flash { font-size: 0.85rem; font-weight: 700; color: var(--photo); min-height: 1.3em; }
+.znow { font-size: 0.85rem; padding: 8px 10px; border-radius: 8px; background: var(--sunk); display: flex; flex-direction: column; gap: 2px; }
+.znow b { font-family: var(--f-mono); font-weight: 500; }
+@media (max-width: 640px) {
+  #zsvg .lbl { font-size: 17px; }
+  #zsvg .lbl-sm { font-size: 15px; }
+  #zsvg .lbl-b { font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<nav class="jump" aria-label="Jump to a section">
+  <div class="jump-inner">
+    <span class="brand">Peat Bog Carbon Lab</span>
+    <a href="#top">Top</a>
+    <a href="#lab-h">The bog</a>
+    <a href="#graph-h">Test one variable</a>
+    <a href="#zombie-h">Zombie fires</a>
+    <a href="#log-h">Data table</a>
+    <a href="#climate-h">Global warming</a>
+  </div>
+</nav>
+<div class="numbar" id="numbar" hidden aria-hidden="true">
+  <div><small>Photosynthesis</small><b id="nbP" style="color: var(--photo)">0</b></div>
+  <div><small>Decomposition</small><b id="nbD" style="color: var(--resp)">0</b></div>
+  <div><small>Burning</small><b id="nbB" style="color: var(--burn)">0</b></div>
+  <div><small>Peat carbon</small><b id="nbN">0</b></div>
+</div>
+
+<div class="wrap" id="top">
   <header class="head">
     <span class="eyebrow">Interactive simulation · Life &amp; Earth science</span>
     <h1>Peat Bog Carbon Lab</h1>
@@ -253,6 +314,7 @@ td.b { color: var(--burn); font-weight: 700; }
         <div class="ctrl" style="gap:8px">
           <span class="sub">Quick scenarios</span>
           <div class="presets" id="presets"></div>
+          <p class="flash" id="flash" role="status" aria-live="polite"></p>
         </div>
         <div class="divider"></div>
         <div class="ctrl">
@@ -350,6 +412,7 @@ td.b { color: var(--burn); font-weight: 700; }
           <div class="chance" id="zChance" style="color: var(--burn)">0%</div>
           <p class="status">Chance this fire survives the winter</p>
         </div>
+        <div class="znow"><span class="sub">Bog settings now</span><span>Water level: <b id="znW"></b></span><span>Oxygen in the peat: <b id="znO"></b></span><span>Burning: <b id="znB"></b></span></div>
         <div class="flowbars" id="zFactors"></div>
         <p class="status" id="zWhy"></p>
         <button class="btn primary" id="zSetup" type="button">Set up zombie fire conditions</button>
@@ -544,15 +607,37 @@ td.b { color: var(--burn); font-weight: 700; }
     list.forEach(([name, val]) => {
       const b = document.createElement("button");
       b.className = "btn"; b.type = "button"; b.textContent = name;
-      b.addEventListener("click", () => fn(val));
+      b.addEventListener("click", () => fn(val, name));
       box.appendChild(b);
     });
   }
-  addButtons($("presets"), PRESETS, vals => setState(vals));
-  addButtons($("tiltPresets"), TILT_PRESETS, t => setState({ tilt: t }));
+  let flashTimer = null;
+  function flash(msg) {
+    $("flash").textContent = msg;
+    clearTimeout(flashTimer); flashTimer = setTimeout(() => { $("flash").textContent = ""; }, 3000);
+  }
+  addButtons($("presets"), PRESETS, (vals, name) => {
+    setState(vals);
+    flash(name === "Reset" ? "Back to starting values." : `Loaded: ${name}.`);
+  });
+  addButtons($("tiltPresets"), TILT_PRESETS, t => { setState({ tilt: t }); flash(`Tilt set to ${t}°.`); });
+  function markActive() {
+    const same = (a, b) => Math.abs(a - b) < 1e-6;
+    document.querySelectorAll("#presets .btn").forEach((b, i) => {
+      const vals = PRESETS[i][1];
+      const on = PRESETS[i][0] !== "Reset" && Object.keys(vals).every(k => same(S[k], vals[k]));
+      b.setAttribute("aria-pressed", String(on));
+    });
+    document.querySelectorAll("#tiltPresets .btn").forEach((b, i) => b.setAttribute("aria-pressed", String(same(S.tilt, TILT_PRESETS[i][1]))));
+  }
+  function paintRange(el) {
+    const pct = (el.value - el.min) / (el.max - el.min) * 100;
+    el.style.setProperty("--pct", pct + "%");
+  }
+  document.addEventListener("input", e => { if (e.target.matches('input[type="range"]')) paintRange(e.target); });
   function setState(vals) {
     Object.assign(S, vals);
-    VARS.forEach(v => { $("s-" + v.key).value = S[v.key]; });
+    VARS.forEach(v => { $("s-" + v.key).value = S[v.key]; paintRange($("s-" + v.key)); });
     update();
   }
   const xSel = $("xVar");
@@ -712,7 +797,7 @@ td.b { color: var(--burn); font-weight: 700; }
     const ph = m.perm * (BASE - SURF - 10);
     L.perm.setAttribute("y", BASE - ph); L.perm.setAttribute("height", ph);
     L.plbl.setAttribute("y", Math.min(BASE - 6, BASE - ph + 18));
-    L.plbl.textContent = m.perm > 0.04 ? `Permafrost: ${Math.round(m.perm * 100)}% of peat frozen` : "";
+    L.plbl.textContent = `Permafrost: ${Math.round(m.perm * 100)}% of peat frozen`;
     L.plants.style.opacity = (0.35 + 0.65 * Math.min(1, m.P / 45)).toFixed(2);
     L.microbes.style.opacity = (0.15 + 0.85 * Math.min(1, m.D / 40)).toFixed(2);
     L.fire.setAttribute("transform", `translate(625 ${SURF}) scale(${(0.4 + m.B / 100 * 0.9).toFixed(2)})`);
@@ -805,6 +890,10 @@ td.b { color: var(--burn); font-weight: 700; }
     });
     placeDots();
     [["p", m.P], ["d", m.D], ["b", m.B]].forEach(([k, v]) => { $(k + "Val").textContent = v.toFixed(0); $(k + "Bar").style.width = v + "%"; });
+    $("nbP").textContent = m.P.toFixed(0); $("nbD").textContent = m.D.toFixed(0); $("nbB").textContent = m.B.toFixed(0);
+    $("nbN").textContent = (m.N > 0 ? "+" : "") + m.N.toFixed(0);
+    $("nbN").style.color = m.N > 1 ? "var(--photo)" : m.N < -1 ? "var(--burn)" : "var(--ink)";
+    markActive();
     const net = m.N;
     $("nVal").textContent = (net > 0 ? "+" : "") + net.toFixed(0);
     $("nVal").style.color = net > 1 ? "var(--photo)" : net < -1 ? "var(--burn)" : "var(--ink)";
@@ -845,6 +934,9 @@ td.b { color: var(--burn); font-weight: 700; }
       "Thawed ground": "Most of the peat is frozen. A fire can't burn into frozen peat.",
       "Summer heat": "Cool summers don't dry the peat deeply enough."
     };
+    $("znW").textContent = S.wet + "%";
+    $("znO").textContent = (S.o2 * (1 - 0.85 * S.wet / 100)).toFixed(1) + "%";
+    $("znB").textContent = Math.round(m.B);
     $("zWhy").textContent = z.chance >= 50 ? "Dry, thawed, oxygen-rich peat lets the fire burrow deep enough to last the winter." : "Biggest obstacle: " + why[weakest[0]];
     drawSeason(m, z);
   }
@@ -1128,6 +1220,17 @@ td.b { color: var(--burn); font-weight: 700; }
     setState({ co2: Math.round(row.C / 10) * 10, temp: clamp(Math.round(DEFAULTS.temp + arcticWarm), -5, 30), tilt: TILT_NOW });
     $("lab-h").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   });
+
+  document.querySelectorAll('input[type="range"]').forEach(paintRange);
+  // phone: show the number bar while the bog controls are on screen but the number boxes are not
+  (function numbarWatch() {
+    if (!("IntersectionObserver" in window)) return;
+    let ctrlIn = false, metersIn = false;
+    const bar = $("numbar"), meters = document.querySelector(".lab .meters");
+    const sync = () => { bar.hidden = !(ctrlIn && !metersIn); };
+    new IntersectionObserver(es => { es.forEach(e => { ctrlIn = e.isIntersecting; }); sync(); }).observe($("controls"));
+    new IntersectionObserver(es => { es.forEach(e => { metersIn = e.isIntersecting; }); sync(); }, { threshold: 0.6 }).observe(meters);
+  })();
 
   update();
   renderLog();
