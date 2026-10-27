@@ -240,6 +240,23 @@ h2[id] { scroll-margin-top: 64px; }
 }
 @media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } html { scroll-behavior: auto; } }
 html { scroll-behavior: smooth; }
+/* change badges */
+.delta { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-family: var(--f-mono); font-size: 0.78rem; font-weight: 500; background: var(--sunk); color: var(--ink); vertical-align: middle; opacity: 0; transition: opacity .3s ease; }
+.delta.show { opacity: 1; }
+/* read aloud */
+.speak { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; padding: 0; }
+.speak:hover { border-color: var(--muted); }
+.speak[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.speak:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.note, .caption { display: flex; gap: 10px; align-items: flex-start; }
+.note > span, .caption > span { flex: 1; min-width: 0; }
+.no-speech .speak { display: none; }
+/* graph hover */
+#explore { touch-action: pan-y; }
+.hov-box { fill: var(--surface); stroke: var(--line); }
+.btn.danger { background: var(--burn); border-color: var(--burn); color: #fff; }
+.btn:disabled { opacity: .5; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .delta { transition: none; } }
 </style>
 </head>
 <body>
@@ -351,26 +368,26 @@ html { scroll-behavior: smooth; }
         <div class="meters">
           <div class="meter">
             <span class="sub">Photosynthesis</span>
-            <div><span class="val" id="pVal" style="color: var(--photo)">0</span> <span class="unit">/ 100</span></div>
+            <div><span class="val" id="pVal" style="color: var(--photo)">0</span> <span class="unit">/ 100</span><span class="delta" aria-hidden="true"></span></div>
             <div class="bar"><span id="pBar" style="background: var(--photo)"></span></div>
             <p>Carbon taken in</p>
           </div>
           <div class="meter">
             <span class="sub">Decomposition</span>
-            <div><span class="val" id="dVal" style="color: var(--resp)">0</span> <span class="unit">/ 100</span></div>
+            <div><span class="val" id="dVal" style="color: var(--resp)">0</span> <span class="unit">/ 100</span><span class="delta" aria-hidden="true"></span></div>
             <div class="bar"><span id="dBar" style="background: var(--resp)"></span></div>
             <p>Carbon released by decomposers</p>
           </div>
           <div class="meter">
             <span class="sub">Burning</span>
-            <div><span class="val" id="bVal" style="color: var(--burn)">0</span> <span class="unit">/ 100</span></div>
+            <div><span class="val" id="bVal" style="color: var(--burn)">0</span> <span class="unit">/ 100</span><span class="delta" aria-hidden="true"></span></div>
             <div class="bar"><span id="bBar" style="background: var(--burn)"></span></div>
             <p>Carbon released by fire</p>
           </div>
           <div class="meter">
             <span class="sub">Peat carbon</span>
             <span class="unit">photosynthesis − decomposition − burning</span>
-            <div><span class="val" id="nVal">0</span></div>
+            <div><span class="val" id="nVal">0</span><span class="delta" aria-hidden="true"></span></div>
             <div class="bar net"><span id="nBar"></span></div>
             <p id="nText"></p>
           </div>
@@ -428,7 +445,7 @@ html { scroll-behavior: smooth; }
         <div class="diagram">
           <svg id="zsvg" viewBox="0 0 700 300" role="img" aria-label="Cross-section of a peat bog through the seasons, showing a fire smoldering underground under winter snow and returning in spring."></svg>
         </div>
-        <p class="caption" id="zCaption" aria-live="polite"></p>
+        <div class="caption"><span id="zCaption" aria-live="polite"></span><button class="speak" type="button" data-say="zCaption" aria-pressed="false" aria-label="Read aloud" title="Read aloud"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
       </div>
     </div>
   </section>
@@ -439,6 +456,7 @@ html { scroll-behavior: smooth; }
       <div class="row">
         <button class="btn primary" id="record" type="button">Record this trial</button>
         <button class="btn" id="copy" type="button">Copy table</button>
+        <button class="btn" id="undo" type="button" disabled>Undo last trial</button>
         <button class="btn" id="clear" type="button">Clear</button>
       </div>
     </div>
@@ -863,8 +881,48 @@ html { scroll-behavior: smooth; }
       if (m.B < 2) out.push(["warn", "The fire won't spread", s.o2 <= 12 ? "There isn't enough oxygen in the air to keep the fire going." : m.perm > 0.8 ? "Frozen peat won't burn." : "Wet peat barely burns."]);
       else out.push(["warn", "Burning", "Fire uses the same inputs as decomposition (peat and oxygen) and makes the same outputs (CO₂ and water). Fire releases the stored energy in minutes as heat and light. Decomposers release it slowly over many years."]);
     }
-    $("notes").innerHTML = out.map(([c, h, t]) => `<div class="note ${c}"><b>${h}.</b> ${t}</div>`).join("");
+    $("notes").innerHTML = out.map(([c, h, t]) => `<div class="note ${c}"><span><b>${h}.</b> ${t}</span><button class="speak" type="button" aria-pressed="false" aria-label="Read aloud" title="Read aloud"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>`).join("");
   }
+
+  /* ---------- change badges ---------- */
+  let settled = null, settleTimer = null;
+  function showDeltas(now) {
+    const badges = document.querySelectorAll(".lab .meter .delta");
+    const r = now.map(Math.round);
+    if (!settled) { settled = r; return; }
+    r.forEach((v, i) => {
+      const d = v - settled[i], el = badges[i];
+      if (!d) { el.classList.remove("show"); return; }
+      el.textContent = (d > 0 ? "↑ " : "↓ ") + Math.abs(d);
+      el.classList.add("show");
+    });
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(() => { settled = r; badges.forEach(b => b.classList.remove("show")); }, 3000);
+  }
+
+  /* ---------- read aloud ---------- */
+  const canSpeak = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  if (!canSpeak) document.documentElement.classList.add("no-speech");
+  let speakingBtn = null;
+  function stopSpeaking() {
+    if (canSpeak) speechSynthesis.cancel();
+    if (speakingBtn) speakingBtn.setAttribute("aria-pressed", "false");
+    speakingBtn = null;
+  }
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".speak");
+    if (!btn || !canSpeak) return;
+    if (speakingBtn === btn) { stopSpeaking(); return; }
+    stopSpeaking();
+    const src = btn.dataset.say ? $(btn.dataset.say) : btn.parentElement.querySelector("span");
+    const text = (src ? src.textContent : "").replace(/CO₂/g, "C O 2").replace(/O₂/g, "O 2").replace(/°C/g, " degrees Celsius").replace(/°/g, " degrees");
+    if (!text.trim()) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; u.rate = 0.95;
+    u.onend = u.onerror = () => { if (speakingBtn === btn) stopSpeaking(); };
+    speakingBtn = btn; btn.setAttribute("aria-pressed", "true");
+    speechSynthesis.speak(u);
+  });
 
   /* ---------- update ---------- */
   function update() {
@@ -894,6 +952,7 @@ html { scroll-behavior: smooth; }
     $("nbN").textContent = (m.N > 0 ? "+" : "") + m.N.toFixed(0);
     $("nbN").style.color = m.N > 1 ? "var(--photo)" : m.N < -1 ? "var(--burn)" : "var(--ink)";
     markActive();
+    showDeltas([m.P, m.D, m.B, m.N]);
     const net = m.N;
     $("nVal").textContent = (net > 0 ? "+" : "") + net.toFixed(0);
     $("nVal").style.color = net > 1 ? "var(--photo)" : net < -1 ? "var(--burn)" : "var(--ink)";
@@ -1098,6 +1157,38 @@ html { scroll-behavior: smooth; }
       series: [{ y: P, color: "--photo", markY: cur.P }, { y: D, color: "--resp", markY: cur.D }, { y: B, color: "--burn", markY: cur.B }],
       marker: S[v.key]
     });
+    addHover($("explore"), v, xs, [["Photosynthesis", P, "--photo"], ["Decomposition", D, "--resp"], ["Burning", B, "--burn"]]);
+  }
+  function addHover(svg, v, xs, series) {
+    const W = 640, H = 300, ml = 46, mr = 14, mt = 12, mb = 42;
+    const n = xs.length - 1;
+    const X = x => ml + (x - v.min) / (v.max - v.min) * (W - ml - mr);
+    const Y = y => H - mb - y / 100 * (H - mt - mb);
+    const g = el("g", { "pointer-events": "none" }, svg); g.style.display = "none";
+    const ln = el("line", { y1: mt, y2: H - mb, "stroke-width": 1.5 }, g); paint(ln, "stroke", "--muted");
+    const dots = series.map(s => { const c = el("circle", { r: 5 }, g); paint(c, "fill", s[2]); return c; });
+    const box = el("rect", { width: 168, height: 82, rx: 6, class: "hov-box" }, g);
+    const tx = [0, 1, 2, 3].map(i => el("text", { class: i ? "lbl" : "lbl-b" }, g));
+    series.forEach((s, i) => paint(tx[i + 1], "fill", s[2]));
+    const fmt = x => v.key === "tilt" ? x.toFixed(2) : v.key === "co2" ? Math.round(x) : x.toFixed(1);
+    const overlay = el("rect", { x: ml, y: mt, width: W - ml - mr, height: H - mt - mb, fill: "transparent" }, svg);
+    const move = e => {
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const i = clamp(Math.round((p.x - ml) / (W - ml - mr) * n), 0, n);
+      const x = X(xs[i]);
+      g.style.display = "";
+      ln.setAttribute("x1", x); ln.setAttribute("x2", x);
+      series.forEach((s, k) => { dots[k].setAttribute("cx", x); dots[k].setAttribute("cy", Y(s[1][i])); });
+      const bx = x + 12 + 168 > W - mr ? x - 12 - 168 : x + 12;
+      box.setAttribute("x", bx); box.setAttribute("y", mt + 4);
+      tx[0].textContent = `${fmt(xs[i])} ${v.unit}`;
+      series.forEach((s, k) => { tx[k + 1].textContent = `${s[0]}: ${Math.round(s[1][i])}`; });
+      tx.forEach((t, k) => { t.setAttribute("x", bx + 10); t.setAttribute("y", mt + 22 + k * 18); });
+    };
+    overlay.addEventListener("pointermove", move);
+    overlay.addEventListener("pointerdown", move);
+    overlay.addEventListener("pointerleave", () => { g.style.display = "none"; });
   }
 
   /* ---------- data log ---------- */
@@ -1106,6 +1197,7 @@ html { scroll-behavior: smooth; }
   const COLS = [["#", r => r.n], ["Tilt °", r => r.tilt.toFixed(2)], ["Temp °C", r => r.Teff], ["CO₂ ppm", r => r.co2], ["O₂ %", r => r.o2], ["Water %", r => r.wet], ["Burning %", r => r.burn], ["Photosynthesis", r => r.P, "p"], ["Decomposition", r => r.D, "r"], ["Fire", r => r.B, "b"], ["Permafrost %", r => r.perm], ["Net", r => (r.N > 0 ? "+" : "") + r.N]];
   function saveLog() { try { localStorage.setItem("peatlab-log", JSON.stringify(log)); } catch (e) {} }
   function renderLog() {
+    $("undo").disabled = !log.length;
     if (!log.length) { $("logWrap").innerHTML = '<div class="empty">No trials yet. Set up the bog, then choose Record this trial.</div>'; return; }
     $("logWrap").innerHTML = "<table><thead><tr>" + COLS.map(c => `<th scope="col">${c[0]}</th>`).join("") + "</tr></thead><tbody>" +
       log.map(r => "<tr>" + COLS.map(c => `<td${c[2] ? ` class="${c[2]}"` : ""}>${c[1](r)}</td>`).join("") + "</tr>").join("") + "</tbody></table>";
@@ -1116,7 +1208,23 @@ html { scroll-behavior: smooth; }
     saveLog(); renderLog();
     $("logStatus").textContent = `Recorded trial ${log.length}.`;
   });
-  $("clear").addEventListener("click", () => { log = []; saveLog(); renderLog(); $("logStatus").textContent = "Table cleared."; });
+  let clearArmed = null;
+  function disarmClear() { clearTimeout(clearArmed); clearArmed = null; $("clear").textContent = "Clear"; $("clear").classList.remove("danger"); }
+  $("clear").addEventListener("click", () => {
+    if (!log.length) { $("logStatus").textContent = "The table is already empty."; return; }
+    if (!clearArmed) {
+      $("clear").textContent = "Click again to erase all"; $("clear").classList.add("danger");
+      $("logStatus").textContent = `This will erase ${log.length === 1 ? "your 1 trial" : `all ${log.length} trials`}. Click the red button again to confirm.`;
+      clearArmed = setTimeout(() => { disarmClear(); $("logStatus").textContent = "Nothing was erased."; }, 4000);
+      return;
+    }
+    disarmClear(); log = []; saveLog(); renderLog(); $("logStatus").textContent = "Table cleared.";
+  });
+  $("undo").addEventListener("click", () => {
+    if (!log.length) return;
+    const gone = log.pop(); saveLog(); renderLog();
+    $("logStatus").textContent = `Removed trial ${gone.n}.`;
+  });
   $("copy").addEventListener("click", () => {
     if (!log.length) { $("logStatus").textContent = "Record at least one trial before copying."; return; }
     const txt = [COLS.map(c => c[0]).join("\t")].concat(log.map(r => COLS.map(c => c[1](r)).join("\t"))).join("\n");
