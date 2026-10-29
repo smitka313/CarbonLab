@@ -556,7 +556,7 @@ html { scroll-behavior: smooth; }
       <li><b>Opposites cancel out</b>Find settings where photosynthesis and decomposition are equal and there is no fire. What happens to the peat? Why does carbon stop building up?</li>
       <li><b>Compare the outputs</b>Decomposition and burning both release CO₂. What inputs do they share? How is the energy released differently?</li>
       <li><b>Zombie fire</b>Start a fire, then raise the water level a little at a time. At what water level does the fire stop surviving the winter? Why does water put it out?</li>
-      <li><b>Thaw</b>Choose "Arctic heat wave." Is the bog still a carbon sink, or has it become a carbon source?</li>
+      <li><b>Thaw</b>Choose "Arctic heat wave." Is the bog still a carbon sink, or is carbon being released to the atmosphere?</li>
     </ul>
   </section>
 
@@ -1045,7 +1045,7 @@ html { scroll-behavior: smooth; }
     $("nText").textContent = net > 1
       ? "Carbon sink. Plants take in more carbon than decomposers and fire release, so peat builds up."
       : net < -1
-        ? "Carbon source. More carbon is released than plants take in, so the peat is shrinking."
+        ? "Carbon released to atmosphere. Decomposers and fire release more carbon than plants take in, so the peat shrinks."
         : "Balanced. The peat is neither growing nor shrinking.";
     notes(m);
     drawExplore();
