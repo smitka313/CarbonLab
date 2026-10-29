@@ -257,6 +257,19 @@ html { scroll-behavior: smooth; }
 .btn.danger { background: var(--burn); border-color: var(--burn); color: #fff; }
 .btn:disabled { opacity: .5; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .delta { transition: none; } }
+/* peat carbon key */
+.netkey { display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; line-height: 1.3; color: var(--ink); background: var(--sunk); border-radius: 8px; padding: 6px 8px; }
+.netkey b { display: inline-block; width: 1.1em; text-align: center; font-family: var(--f-display); font-size: 0.95rem; }
+.netkey .pos { color: var(--photo); }
+.netkey .neg { color: var(--burn); }
+.netkey strong { font-weight: 700; }
+@media (min-width: 901px) { .lab #nText { display: none; } }
+.netkey-wide { display: none; }
+@media (min-width: 901px) and (max-height: 760px) {
+  .lab .meter .netkey { display: none; }
+  .netkey-wide { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 0.74rem; padding: 4px 10px; }
+  .netkey-wide span:first-child b { width: auto; font-family: var(--f-mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); }
+}
 /* top cards: inputs on one line, arrow + outputs on the next */
 .io { flex-direction: column; align-items: flex-start; }
 .io-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -267,7 +280,7 @@ html { scroll-behavior: smooth; }
 /* bigger picture while pinned on laptops */
 @media (min-width: 901px) {
   .lab .meter:not(:last-child) p { display: none; }
-  .lab > .stage #bog { max-height: calc(100vh - 285px); }
+  .lab > .stage #bog { max-height: calc(100vh - 345px); }
   .lab .legend .chip { font-size: 0.8rem; padding: 1px 8px; }
 }
 /* small laptops: narrower control panel */
@@ -288,7 +301,7 @@ html { scroll-behavior: smooth; }
 }
 @media (min-width: 901px) and (max-height: 760px) {
   .lab > .stage { top: 48px; max-height: calc(100vh - 56px); gap: 10px; }
-  .lab > .stage #bog { max-height: calc(100vh - 200px); }
+  .lab > .stage #bog { max-height: calc(100vh - 230px); }
   .lab .diagram { padding: 8px; }
   .lab .legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 6px 2px 0; gap: 4px; }
   .lab .legend::-webkit-scrollbar { display: none; }
@@ -449,8 +462,17 @@ html { scroll-behavior: smooth; }
             <span class="unit">photosynthesis − decomposition − burning</span>
             <div><span class="val" id="nVal">0</span><span class="delta" aria-hidden="true"></span></div>
             <div class="bar net"><span id="nBar"></span></div>
+            <div class="netkey">
+              <span><b class="pos">+</b> Positive: <strong>carbon sink</strong>. Peat grows.</span>
+              <span><b class="neg">−</b> Negative: <strong>carbon source</strong>. Peat shrinks.</span>
+            </div>
             <p id="nText"></p>
           </div>
+        </div>
+        <div class="netkey netkey-wide" aria-hidden="true">
+          <span><b>PEAT CARBON</b></span>
+          <span><b class="pos">+</b> Positive: <strong>carbon sink</strong>. Peat grows.</span>
+          <span><b class="neg">−</b> Negative: <strong>carbon source</strong>. Peat shrinks.</span>
         </div>
         <div class="notes" id="notes" aria-live="polite"></div>
       </div>
