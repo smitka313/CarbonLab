@@ -257,13 +257,22 @@ html { scroll-behavior: smooth; }
 .btn.danger { background: var(--burn); border-color: var(--burn); color: #fff; }
 .btn:disabled { opacity: .5; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .delta { transition: none; } }
+/* info buttons and explainers */
+.info { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-left: 6px; padding: 0; border-radius: 50%; border: 1.5px solid var(--o2); background: var(--surface); color: var(--o2); font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: 0.82rem; line-height: 1; cursor: pointer; vertical-align: middle; }
+.info::after { content: ""; position: absolute; inset: -7px; }
+.info:hover, .info[aria-expanded="true"] { background: var(--o2); color: var(--surface); }
+.info:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.tip { display: block; margin-top: 6px; padding: 7px 10px; border-radius: 8px; background: var(--sunk); border-left: 3px solid var(--o2); font-size: 0.84rem; line-height: 1.4; color: var(--ink); font-family: var(--f-body); font-weight: 400; letter-spacing: 0; text-transform: none; }
+.lbl-row { display: inline-flex; align-items: center; }
+.scale-note { font-size: 0.8rem; color: var(--muted); margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; }
+@media (min-width: 901px) and (max-height: 760px) { .scale-note { font-size: 0.72rem; } }
 /* peat carbon key */
 .netkey { display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; line-height: 1.3; color: var(--ink); background: var(--sunk); border-radius: 8px; padding: 6px 8px; }
 .netkey b { display: inline-block; width: 1.1em; text-align: center; font-family: var(--f-display); font-size: 0.95rem; }
 .netkey .pos { color: var(--photo); }
 .netkey .neg { color: var(--burn); }
 .netkey strong { font-weight: 700; }
-@media (min-width: 901px) { .lab #nText { display: none; } }
+@media (min-width: 901px) { .lab #nText, .lab .meters .meter:last-child > .unit { display: none; } }
 .netkey-wide { display: none; }
 @media (min-width: 901px) and (max-height: 760px) {
   .lab .meter .netkey { display: none; }
@@ -301,7 +310,7 @@ html { scroll-behavior: smooth; }
 }
 @media (min-width: 901px) and (max-height: 760px) {
   .lab > .stage { top: 48px; max-height: calc(100vh - 56px); gap: 10px; }
-  .lab > .stage #bog { max-height: calc(100vh - 230px); }
+  .lab > .stage #bog { max-height: calc(100vh - 252px); }
   .lab .diagram { padding: 8px; }
   .lab .legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 6px 2px 0; gap: 4px; }
   .lab .legend::-webkit-scrollbar { display: none; }
@@ -420,6 +429,7 @@ html { scroll-behavior: smooth; }
             <dt>Change from today</dt><dd id="fQd"></dd>
             <dt>Summer warming from tilt</dt><dd id="fT"></dd>
           </dl>
+          <div><span class="sub">What do 65°N and W/m² mean?</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-tilt" aria-label="What do 65 degrees north and watts per square meter mean?" title="What do 65 degrees north and watts per square meter mean?">i</button><span class="tip" id="tip-tilt" hidden><b>65°N</b> is a latitude in the Arctic, where many peat bogs are. <b>W/m²</b> (watts per square meter) measures how much sunlight energy hits each square meter of ground.</span></div>
         </div>
         <div id="sliders" style="display:flex;flex-direction:column;gap:14px"></div>
       </div>
@@ -469,6 +479,10 @@ html { scroll-behavior: smooth; }
             <p id="nText"></p>
           </div>
         </div>
+        <div>
+          <p class="scale-note">Rates use a 0–100 scale: 0 = stopped, 100 = fastest. <button class="info" type="button" aria-expanded="false" aria-controls="tip-scale" aria-label="What does the 0 to 100 scale mean?" title="What does the 0 to 100 scale mean?">i</button></p>
+          <span class="tip" id="tip-scale" hidden>These are not real-world units. 0 means the process has stopped, and 100 is the fastest it can go in this simulation. The ↑ and ↓ badges show how much each number went up or down after your last change.</span>
+        </div>
         <div class="netkey netkey-wide" aria-hidden="true">
           <span><b>PEAT CARBON</b></span>
           <span><b class="pos">+</b> Positive: <strong>carbon sink</strong>. Peat grows.</span>
@@ -512,6 +526,7 @@ html { scroll-behavior: smooth; }
           <p class="status">Chance this fire survives the winter</p>
         </div>
         <div class="znow"><span class="sub">Bog settings now</span><span>Water level: <b id="znW"></b></span><span>Oxygen in the peat: <b id="znO"></b></span><span>Burning: <b id="znB"></b></span></div>
+        <div><span class="sub">What the fire needs</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-zfac" aria-label="What do these bars mean?" title="What do these bars mean?">i</button><span class="tip" id="tip-zfac" hidden>Each bar shows how much that condition helps the fire survive the winter. A fire needs all five to be high. One short bar can put it out.</span></div>
         <div class="flowbars" id="zFactors"></div>
         <p class="status" id="zWhy"></p>
         <button class="btn primary" id="zSetup" type="button">Set up zombie fire conditions</button>
@@ -572,7 +587,7 @@ html { scroll-behavior: smooth; }
     <div class="climate">
       <div class="panel">
         <div class="ctrl">
-          <div class="ctrl-top"><label for="fossil">Burning fossil fuels</label><output id="fossilOut" for="fossil"></output></div>
+          <div class="ctrl-top"><span class="lbl-row"><label for="fossil">Burning fossil fuels</label><button class="info" type="button" aria-expanded="false" aria-controls="tip-gt" aria-label="What does Gt mean?" title="What does Gt mean?">i</button></span><output id="fossilOut" for="fossil"></output></div><span class="tip" id="tip-gt" hidden><b>Gt</b> = gigatonnes, or billions of tonnes of carbon.</span>
           <input type="range" id="fossil" min="0" max="20" step="0.5" value="10">
           <span class="hint">Billions of tonnes of carbon per year. Today is about 10.</span>
         </div>
@@ -587,7 +602,7 @@ html { scroll-behavior: smooth; }
         </div>
         <div class="divider"></div>
         <div class="flowbars">
-          <span class="sub">Carbon each year (billion tonnes)</span>
+          <div><span class="sub">Carbon each year (billion tonnes)</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-flows" aria-label="How do I read these bars?" title="How do I read these bars?">i</button><span class="tip" id="tip-flows" hidden><b>Gt</b> = gigatonnes, or billions of tonnes of carbon. Red bars add carbon to the air. Green and blue bars remove it. If the red bars are bigger, CO₂ in the air goes up.</span></div>
           <div class="flowbar"><span>Fossil fuels</span><div class="bar"><span id="b-fossil" style="background: var(--burn)"></span></div><span class="num" id="n-fossil"></span></div>
           <div class="flowbar"><span>Clearing &amp; draining land</span><div class="bar"><span id="b-clear" style="background: var(--burn)"></span></div><span class="num" id="n-clear"></span></div>
           <div class="flowbar"><span>Taken up by plants</span><div class="bar"><span id="b-land" style="background: var(--photo)"></span></div><span class="num" id="n-land"></span></div>
@@ -604,7 +619,7 @@ html { scroll-behavior: smooth; }
         </div>
         <div class="climate-charts">
           <div class="chart-box"><span class="sub">CO₂ in the air (ppm)</span><svg id="c-co2" viewBox="0 0 360 220" role="img" aria-label="Line graph of carbon dioxide from 2025 to 2100"></svg></div>
-          <div class="chart-box"><span class="sub">Warming since the 1800s (°C)</span><svg id="c-temp" viewBox="0 0 360 220" role="img" aria-label="Line graph of global warming from 2025 to 2100"></svg></div>
+          <div class="chart-box"><div><span class="sub">Warming since the 1800s (°C)</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-goal" aria-label="What are the 1.5 and 2 degree lines?" title="What are the 1.5 and 2 degree lines?">i</button><span class="tip" id="tip-goal" hidden>In the 2015 Paris Agreement, most countries agreed to try to keep warming below 2 °C, and ideally 1.5 °C, above 1800s levels.</span></div><svg id="c-temp" viewBox="0 0 360 220" role="img" aria-label="Line graph of global warming from 2025 to 2100"></svg></div>
         </div>
         <div class="explain">
           <div><h3>Why CO₂ traps heat</h3><p>Sunlight passes through the air and warms the ground. The ground gives off heat as infrared energy. CO₂ molecules absorb that heat and send some of it back down, like a blanket.</p></div>
@@ -646,10 +661,10 @@ html { scroll-behavior: smooth; }
   const VARS = [
     { key: "tilt", label: "Earth's tilt", min: 22.1, max: 24.5, step: 0.05, unit: "°", fmt: v => v.toFixed(2) + "°" },
     { key: "temp", label: "Summer temperature", min: -5, max: 30, step: 1, unit: "°C", fmt: v => v + " °C", hint: "Average Arctic summer air temperature before the tilt effect. About 10 °C today." },
-    { key: "co2", label: "Carbon dioxide", min: 0, max: 2000, step: 10, unit: "ppm", fmt: v => v + " ppm", hint: "Air today is about 420 ppm." },
+    { key: "co2", label: "Carbon dioxide", min: 0, max: 2000, step: 10, unit: "ppm", fmt: v => v + " ppm", hint: "Air today is about 420 ppm.", info: ["What does ppm mean?", "<b>ppm</b> = parts per million. 420 ppm means 420 CO₂ molecules in every million molecules of air."] },
     { key: "o2", label: "Oxygen in the air", min: 0, max: 35, step: 1, unit: "%", fmt: v => v + "%", hint: "Air today is about 21%. Fire needs more than about 12%." },
     { key: "wet", label: "Water level in the bog", min: 0, max: 100, step: 1, unit: "%", fmt: v => v + "%", hint: "Water fills the air spaces in the peat. Higher water means less oxygen for decomposers and fire." },
-    { key: "burn", label: "Burning", min: 0, max: 100, step: 1, unit: "%", fmt: v => v + "%", hint: "Wildfire from lightning, or people cutting and burning peat for fuel." }
+    { key: "burn", label: "Burning", min: 0, max: 100, step: 1, unit: "%", fmt: v => v + "%", hint: "Wildfire from lightning, or people cutting and burning peat for fuel.", info: ["What does the Burning percent mean?", "How much of the bog’s surface is on fire. Wet peat burns much less than dry peat, even at the same setting."] }
   ];
   const DEFAULTS = { tilt: TILT_NOW, temp: 10, co2: 420, o2: 21, wet: 75, burn: 0 };
   const ZOMBIE = { tilt: TILT_NOW, temp: 19, co2: 420, o2: 21, wet: 22, burn: 55 };
@@ -697,7 +712,8 @@ html { scroll-behavior: smooth; }
   VARS.filter(v => v.key !== "tilt").forEach(v => {
     const d = document.createElement("div");
     d.className = "ctrl";
-    d.innerHTML = `<div class="ctrl-top"><label for="s-${v.key}">${v.label}</label><output id="o-${v.key}" for="s-${v.key}"></output></div>
+    const info = v.info ? `<button class="info" type="button" aria-expanded="false" aria-controls="tip-${v.key}" aria-label="${v.info[0]}" title="${v.info[0]}">i</button>` : "";
+    d.innerHTML = `<div class="ctrl-top"><span class="lbl-row"><label for="s-${v.key}">${v.label}</label>${info}</span><output id="o-${v.key}" for="s-${v.key}"></output></div>${v.info ? `<span class="tip" id="tip-${v.key}" hidden>${v.info[1]}</span>` : ""}
       <input type="range" id="s-${v.key}" min="${v.min}" max="${v.max}" step="${v.step}" value="${S[v.key]}">
       <span class="hint">${v.hint}</span>${v.key === "temp" ? '<span class="hint" id="effT"></span>' : ""}${v.key === "wet" ? '<div class="o2read"><div class="ctrl-top"><b>Oxygen in the peat</b><output id="o2Peat"></output></div><div class="bar"><span id="o2PeatBar" style="background: var(--o2)"></span></div><span class="hint" id="o2PeatTxt"></span></div>' : ""}`;
     sliders.appendChild(d);
@@ -981,6 +997,26 @@ html { scroll-behavior: smooth; }
     clearTimeout(settleTimer);
     settleTimer = setTimeout(() => { settled = r; badges.forEach(b => b.classList.remove("show")); }, 3000);
   }
+
+  /* ---------- info explainers ---------- */
+  function closeTips(except) {
+    document.querySelectorAll(".info[aria-expanded='true']").forEach(b => {
+      if (b === except) return;
+      b.setAttribute("aria-expanded", "false");
+      const t = document.getElementById(b.getAttribute("aria-controls"));
+      if (t) t.hidden = true;
+    });
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest(".info");
+    if (!b) return;
+    const t = document.getElementById(b.getAttribute("aria-controls"));
+    const open = b.getAttribute("aria-expanded") !== "true";
+    closeTips(b);
+    b.setAttribute("aria-expanded", String(open));
+    if (t) t.hidden = !open;
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeTips(null); });
 
   /* ---------- read aloud ---------- */
   const canSpeak = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
