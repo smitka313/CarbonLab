@@ -415,9 +415,13 @@ html.bigtext { font-size: 115%; }
   .lab .meter p, .lab .meters .meter:last-child > .unit { display: none; }
   .lab .meter .sub { font-size: 0.66rem; }
 }
+@media (min-width: 901px) and (max-width: 1250px) and (max-height: 760px) {
+  .netkey-wide { gap: 2px 10px; font-size: 0.7rem; padding: 4px 8px; }
+  .netkey-wide span:first-child { display: none; }
+}
 @media (min-width: 901px) and (max-width: 1050px) and (max-height: 760px) {
   .lab > .stage #bog { max-height: calc(100vh - 233px - var(--navh, 39px)); }
-  html.bigtext .lab > .stage #bog { max-height: calc(100vh - 262px - var(--navh, 39px)); }
+  html.bigtext .lab > .stage #bog { max-height: calc(100vh - 270px - var(--navh, 39px)); }
 }
 /* phones: bog picture scrolls sideways at a readable size */
 .swipe { display: none; font-size: 0.85rem; color: var(--muted); margin: 2px 4px 6px; }
@@ -575,7 +579,7 @@ html.bigtext { font-size: 115%; }
             <div class="bar net"><span id="nBar"></span></div>
             <div class="netkey">
               <span><b class="pos">+</b> Positive: <strong>carbon sink</strong>. Peat grows.</span>
-              <span><b class="neg">−</b> Negative: <strong>Carbon released to atmosphere</strong>. Peat shrinks.</span>
+              <span><b class="neg">−</b> Negative: <strong>Carbon Source - C Released to Atmosphere</strong>. Peat shrinks.</span>
             </div>
             <p id="nText"></p>
           </div>
@@ -587,7 +591,7 @@ html.bigtext { font-size: 115%; }
         <div class="netkey netkey-wide" aria-hidden="true">
           <span><b>PEAT CARBON</b></span>
           <span><b class="pos">+</b> Positive: <strong>carbon sink</strong>. Peat grows.</span>
-          <span><b class="neg">−</b> Negative: <strong>Carbon released to atmosphere</strong>. Peat shrinks.</span>
+          <span><b class="neg">−</b> Negative: <strong>Carbon Source - C Released to Atmosphere</strong>. Peat shrinks.</span>
         </div>
         <div class="notes" id="notes" aria-live="polite"></div>
       </div>
