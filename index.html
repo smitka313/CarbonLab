@@ -58,7 +58,7 @@ body { margin: 0; }
 [hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--ink);
-  font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  font-family: var(--f-body); font-size: 1rem; line-height: 1.5;
 }
 .wrap {
   max-width: 1180px; margin: 0 auto;
@@ -270,6 +270,10 @@ html { scroll-behavior: smooth; }
 .fab:hover { filter: brightness(1.15); }
 .fab:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .fab-count { min-width: 24px; padding: 1px 7px; border-radius: 999px; background: var(--photo); color: #fff; font-family: var(--f-mono); font-size: 0.8rem; text-align: center; }
+.jump .nav-data { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+.navcount { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--photo); color: #fff; font-family: var(--f-mono); font-size: 0.75rem; text-align: center; }
+@media (min-width: 901px) { .fab { display: none !important; } }
+.jump .brand { display: none; }
 body.numbar-on .fab { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
 .backdrop { position: fixed; inset: 0; z-index: 49; background: rgba(0,0,0,.35); }
 .drawer { position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; width: min(640px, 100vw); background: var(--bg); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0,0,0,.2); display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
@@ -286,6 +290,42 @@ body.drawer-open { overflow: hidden; }
 .lbl-input { width: 15em; padding: 4px 8px; font-size: 0.85rem; text-align: left; }
 td.lbl, #logWrap th:nth-child(2) { text-align: left; }
 tr.newgroup td { border-top: 3px solid var(--photo); }
+/* nav buttons */
+.jump .navbtn { white-space: nowrap; font: inherit; font-size: 0.88rem; padding: 6px 12px; border-radius: 999px; background: var(--surface); color: var(--ink); border: 1px solid var(--o2); cursor: pointer; }
+.jump .navbtn[aria-pressed="true"] { background: var(--o2); color: var(--surface); }
+.jump .navbtn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (max-height: 760px) { .jump .navbtn { padding: 4px 10px; font-size: 0.8rem; } }
+html.bigtext { font-size: 115%; }
+/* exact-value boxes */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.numwrap { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.num { width: 4.6em; font-family: var(--f-mono); font-size: 0.9rem; text-align: right; padding: 2px 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.num:hover { border-color: var(--muted); }
+.num:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.numunit { font-family: var(--f-mono); font-size: 0.85rem; color: var(--ink); }
+/* reset buttons */
+.rec-reset { padding: 4px 12px; font-size: 0.8rem; font-weight: 700; }
+.zrec .rec-reset { padding: 8px 14px; font-size: 0.9rem; }
+#climateReset { padding: 8px 14px; }
+/* help panel */
+.help { display: flex; flex-direction: column; gap: 14px; }
+.help h3 { font-size: 1rem; margin-bottom: 2px; }
+.help p { font-size: 0.92rem; }
+.keep-note { font-size: 0.82rem; }
+.print-only { display: none; }
+@media print {
+  body * { visibility: hidden !important; }
+  #dataDrawer, #dataDrawer * { visibility: visible !important; }
+  #dataDrawer { position: absolute; inset: 0 auto auto 0; width: 100%; border: 0; box-shadow: none; overflow: visible; padding: 0; background: #fff; color: #000; }
+  #dataDrawer .row, #dataDrawer .drawer-close, #dataDrawer .label-field, #logStatus, .keep-note { display: none !important; }
+  .print-only { display: block; font-size: 11pt; }
+  #dataDrawer .table-wrap { overflow: visible; border: 0; }
+  #dataDrawer table { font-size: 9pt; }
+  #dataDrawer th { background: #eee !important; color: #000 !important; }
+  #dataDrawer td, #dataDrawer td * { color: #000 !important; }
+  .lbl-input { border: 0 !important; padding: 0 !important; width: auto !important; }
+  .backdrop, .fab, .jump { display: none !important; }
+}
 /* collapsible graph */
 .collapse-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; cursor: pointer; font-family: var(--f-display); font-weight: 700; color: var(--ink); border-radius: 8px; padding: 2px 0; }
 .collapse-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
@@ -396,9 +436,11 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     <a href="#lab-h">The bog</a>
     <a href="#graph-h">Test one variable</a>
     <a href="#zombie-h">Zombie fires</a>
-    <a href="#log-h" data-open-drawer>Data table</a>
+    <a href="#log-h" data-open-drawer class="nav-data" aria-haspopup="dialog" aria-controls="dataDrawer" aria-expanded="false">Data table <span class="navcount" id="navCount">0</span></a>
     <a href="#try-h">Investigations</a>
     <a href="#climate-h">Global warming</a>
+    <button class="navbtn" id="helpBtn" type="button" aria-haspopup="dialog" aria-controls="helpDrawer" aria-expanded="false">? Help</button>
+    <button class="navbtn" id="textBtn" type="button" aria-pressed="false">A+ Larger text</button>
   </div>
 </nav>
 <div class="numbar" id="numbar" hidden aria-hidden="true">
@@ -528,7 +570,7 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
           </div>
         </div>
         <div>
-          <p class="scale-note">Rates use a 0–100 scale: 0 = stopped, 100 = fastest. <button class="info" type="button" aria-expanded="false" aria-controls="tip-scale" aria-label="What does the 0 to 100 scale mean?" title="What does the 0 to 100 scale mean?">i</button><span class="rec-wrap"><span id="recStatus" class="rec-status" role="status" aria-live="polite"></span><button class="btn rec-btn" id="record2" type="button">Record this trial</button></span></p>
+          <p class="scale-note">Rates use a 0–100 scale: 0 = stopped, 100 = fastest. <button class="info" type="button" aria-expanded="false" aria-controls="tip-scale" aria-label="What does the 0 to 100 scale mean?" title="What does the 0 to 100 scale mean?">i</button><span class="rec-wrap"><span id="recStatus" class="rec-status" role="status" aria-live="polite"></span><button class="btn rec-reset" id="reset2" type="button">Reset</button><button class="btn rec-btn" id="record2" type="button">Record this trial</button></span></p>
           <span class="tip" id="tip-scale" hidden>These are not real-world units. 0 means the process has stopped, and 100 is the fastest it can go in this simulation. The ↑ and ↓ badges show how much each number went up or down after your last change.</span>
         </div>
         <div class="netkey netkey-wide" aria-hidden="true">
@@ -595,6 +637,7 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
         </div>
         <div class="zrec">
           <button class="btn rec-btn" id="record3" type="button">Record this trial</button>
+          <button class="btn rec-reset" id="reset3" type="button">Reset</button>
           <span class="rec-status" id="zRecStatus" role="status" aria-live="polite"></span>
         </div>
         <button class="btn primary" id="zSetup" type="button">Set up zombie fire conditions</button>
@@ -677,7 +720,8 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
           <div class="flowbar"><span>Taken up by oceans</span><div class="bar"><span id="b-ocean" style="background: var(--o2)"></span></div><span class="num" id="n-ocean"></span></div>
           <p class="status" id="balanceText"></p>
         </div>
-        <button class="btn primary" id="sendBog" type="button">Test the bog in this year</button>
+        <div class="row"><button class="btn primary" id="sendBog" type="button">Test the bog in this year</button><button class="btn rec-reset" id="climateReset" type="button">Reset to today</button></div>
+        <p class="rec-status" id="climateStatus" role="status" aria-live="polite"></p>
         <p class="status">Sets the bog to that year's CO₂ level. The Arctic warms about 2.5 times faster than the planet as a whole, so its summer temperature rises more.</p>
       </div>
 
@@ -704,6 +748,21 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
   <span>Data table</span><span class="fab-count" id="fabCount">0</span>
 </button>
 <div class="backdrop" id="dataBackdrop" hidden></div>
+<aside class="drawer" id="helpDrawer" role="dialog" aria-modal="true" aria-labelledby="help-h" hidden>
+  <div class="drawer-head">
+    <h2 id="help-h">How to use this simulator</h2>
+    <button class="drawer-close" type="button" aria-label="Close help">×</button>
+  </div>
+  <div class="help">
+    <section><h3>Set an exact number</h3><p>Type the number in the box next to a slider and press <b>Enter</b>. Or click the slider's round handle and use the <b>left</b> and <b>right arrow keys</b>.</p></section>
+    <section><h3>Start over</h3><p>Click <b>Reset</b> to put every bog setting back to the start. Reset buttons are in <b>Quick scenarios</b>, next to <b>Record this trial</b> under the bog picture, and in <b>Zombie fires</b>. <b>Reset to today</b> resets the global warming sliders.</p></section>
+    <section><h3>Read the bog picture</h3><p>Moving dots show materials moving. Thicker, faster arrows mean a faster rate. Gray = carbon dioxide, dark blue = oxygen, teal = water, purple = dead plants becoming peat, yellow = sunlight. The dashed blue line is the water level. The blue striped layer is permafrost (frozen peat).</p></section>
+    <section><h3>Read the number boxes</h3><p>Rates go from 0 (stopped) to 100 (fastest). The ↑ and ↓ badges show how much a number changed. <b>Peat carbon</b>: positive (green) means a carbon sink and the peat grows. Negative (red) means carbon is released to the atmosphere and the peat shrinks.</p></section>
+    <section><h3>Get more help</h3><p>Click an <b>i</b> button to explain a term. Click a speaker button to hear a note read aloud. Use the buttons at the top of the screen to jump to a section.</p></section>
+    <section><h3>Keep your data</h3><p>Click <b>Record this trial</b> to save the current numbers. Open the <b>Data table</b> button in the corner to see them, label them, and click <b>Download (CSV)</b> to keep a copy. Trials are saved only on this computer.</p></section>
+    <section><h3>Your settings are remembered</h3><p>If the page refreshes, your last settings come back. Click <b>Reset</b> to start fresh.</p></section>
+  </div>
+</aside>
 <aside class="drawer" id="dataDrawer" role="dialog" aria-modal="true" aria-labelledby="log-h" hidden>
   <div class="drawer-head">
     <h2 id="log-h">Data table</h2>
@@ -714,7 +773,10 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     <button class="btn" id="copy" type="button">Copy table</button>
     <button class="btn" id="undo" type="button" disabled>Undo last trial</button>
     <button class="btn" id="clear" type="button">Clear</button>
+    <button class="btn" id="downloadCsv" type="button">Download (CSV)</button>
+    <button class="btn" id="printTable" type="button">Print</button>
   </div>
+  <p class="print-only">Peat Bog Carbon Lab data · Name: ______________________ · Date: ____________</p>
   <div class="label-field">
     <label for="trialLabel">What are you testing? <span class="status">This label is added to each new trial.</span></label>
     <input id="trialLabel" type="text" list="labelOptions" maxlength="60" placeholder="Leave blank to label trials automatically" autocomplete="off">
@@ -728,6 +790,7 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     </datalist>
   </div>
   <p class="status" id="logStatus">Record a trial each time you change one variable. You can rename any trial's label in the table. Copy the table into a spreadsheet or document to graph it.</p>
+  <p class="status keep-note">Your trials are saved only in this browser on this computer. Use <b>Download (CSV)</b> to keep a copy you can open in Google Sheets or Excel.</p>
   <div class="table-wrap" id="logWrap"></div>
 </aside>
 
@@ -1134,34 +1197,49 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
   document.querySelectorAll('a[href="#graph-h"]').forEach(a => a.addEventListener("click", () => setGraphOpen(true)));
   if (location.hash === "#graph-h") setGraphOpen(true);
 
-  /* ---------- data table drawer ---------- */
-  let drawerReturn = null;
-  function openDrawer() {
-    drawerReturn = document.activeElement;
-    $("dataDrawer").hidden = false; $("dataBackdrop").hidden = false;
+  /* ---------- side panels (data table, help) ---------- */
+  let openId = null, panelReturn = null;
+  function openPanel(id) {
+    if (openId) closePanel(true);
+    panelReturn = document.activeElement;
+    $(id).hidden = false; $("dataBackdrop").hidden = false;
     document.body.classList.add("drawer-open");
-    $("dataFab").setAttribute("aria-expanded", "true");
-    $("drawerClose").focus();
+    document.querySelectorAll(`[aria-controls="${id}"]`).forEach(b => b.setAttribute("aria-expanded", "true"));
+    openId = id;
+    $(id).querySelector(".drawer-close").focus();
   }
-  function closeDrawer() {
-    $("dataDrawer").hidden = true; $("dataBackdrop").hidden = true;
+  function closePanel(keepFocus) {
+    if (!openId) return;
+    $(openId).hidden = true; $("dataBackdrop").hidden = true;
     document.body.classList.remove("drawer-open");
-    $("dataFab").setAttribute("aria-expanded", "false");
-    if (drawerReturn && drawerReturn.focus) drawerReturn.focus();
+    document.querySelectorAll(`[aria-controls="${openId}"]`).forEach(b => b.setAttribute("aria-expanded", "false"));
+    openId = null;
+    if (!keepFocus && panelReturn && panelReturn.focus) panelReturn.focus();
   }
-  $("dataFab").addEventListener("click", openDrawer);
-  $("drawerClose").addEventListener("click", closeDrawer);
-  $("dataBackdrop").addEventListener("click", closeDrawer);
-  document.querySelectorAll("[data-open-drawer]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); openDrawer(); }));
+  $("dataFab").addEventListener("click", () => openPanel("dataDrawer"));
+  $("helpBtn").addEventListener("click", () => openPanel("helpDrawer"));
+  document.querySelectorAll(".drawer-close").forEach(b => b.addEventListener("click", () => closePanel()));
+  $("dataBackdrop").addEventListener("click", () => closePanel());
+  document.querySelectorAll("[data-open-drawer]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); openPanel("dataDrawer"); }));
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && !$("dataDrawer").hidden) { closeDrawer(); return; }
-    if (e.key === "Tab" && !$("dataDrawer").hidden) {
-      const f = [...$("dataDrawer").querySelectorAll("button:not([disabled]), input")];
+    if (!openId) return;
+    if (e.key === "Escape") { closePanel(); return; }
+    if (e.key === "Tab") {
+      const f = [...$(openId).querySelectorAll("button:not([disabled]), input")];
       if (!f.length) return;
       if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
       else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
     }
   });
+
+  /* ---------- larger text ---------- */
+  function setBigText(on) {
+    document.documentElement.classList.toggle("bigtext", on);
+    $("textBtn").setAttribute("aria-pressed", String(on));
+    try { localStorage.setItem("peatlab-bigtext", on ? "1" : ""); } catch (e) {}
+  }
+  $("textBtn").addEventListener("click", () => setBigText(!document.documentElement.classList.contains("bigtext")));
+  try { if (localStorage.getItem("peatlab-bigtext")) setBigText(true); } catch (e) {}
 
   /* ---------- info explainers ---------- */
   function closeTips(except) {
@@ -1236,6 +1314,7 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     $("nbN").style.color = m.N > 1 ? "var(--photo)" : m.N < -1 ? "var(--burn)" : "var(--ink)";
     markActive();
     showDeltas([m.P, m.D, m.B, m.N]);
+    syncNums(); saveSettings();
     const net = m.N;
     $("nVal").textContent = (net > 0 ? "+" : "") + net.toFixed(0);
     $("nVal").style.color = net > 1 ? "var(--photo)" : net < -1 ? "var(--burn)" : "var(--ink)";
@@ -1494,6 +1573,7 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
   function renderLog() {
     $("undo").disabled = !log.length;
     $("fabCount").textContent = log.length;
+    $("navCount").textContent = log.length;
     if (!log.length) { $("logWrap").innerHTML = '<div class="empty">No trials yet. Set up the bog, then choose Record this trial.</div>'; return; }
     const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
     $("logWrap").innerHTML = "<table><thead><tr>" + COLS.map(c => `<th scope="col">${c[0]}</th>`).join("") + "</tr></thead><tbody>" +
@@ -1526,6 +1606,16 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     $("zRecStatus").textContent = `Saved as trial ${log.length} (${label}). Open the Data table to see it.`;
     clearTimeout(recTimer); recTimer = setTimeout(() => { $("recStatus").textContent = ""; $("zRecStatus").textContent = ""; }, 3000);
   }
+  function bogReset(statusId) {
+    setState(DEFAULTS);
+    flash("Back to starting values.");
+    if (statusId) {
+      $(statusId).textContent = "Back to starting values.";
+      clearTimeout(recTimer); recTimer = setTimeout(() => { $("recStatus").textContent = ""; $("zRecStatus").textContent = ""; }, 3000);
+    }
+  }
+  $("reset2").addEventListener("click", () => bogReset("recStatus"));
+  $("reset3").addEventListener("click", () => bogReset("zRecStatus"));
   $("record").addEventListener("click", () => recordTrial("table"));
   $("record2").addEventListener("click", () => recordTrial("bog"));
   $("record3").addEventListener("click", () => recordTrial("zombie"));
@@ -1545,6 +1635,20 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     if (!log.length) return;
     const gone = log.pop(); saveLog(); renderLog();
     $("logStatus").textContent = `Removed trial ${gone.n}.`;
+  });
+  $("downloadCsv").addEventListener("click", () => {
+    if (!log.length) { $("logStatus").textContent = "Record at least one trial before downloading."; return; }
+    const q = v => { const t = String(v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+    const csv = [COLS.map(c => q(c[0])).join(",")].concat(log.map(r => COLS.map(c => q(c[1](r))).join(","))).join("\r\n");
+    const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a"); a.href = url; a.download = "peat-bog-data.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    $("logStatus").textContent = "Downloaded peat-bog-data.csv. Look in your Downloads folder.";
+  });
+  $("printTable").addEventListener("click", () => {
+    if (!log.length) { $("logStatus").textContent = "Record at least one trial before printing."; return; }
+    window.print();
   });
   $("copy").addEventListener("click", () => {
     if (!log.length) { $("logStatus").textContent = "Record at least one trial before copying."; return; }
@@ -1634,6 +1738,7 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
         ? `Plants and oceans remove more than is added, so CO₂ in the air falls about ${Math.abs(dC).toFixed(1)} ppm per year.`
         : "Carbon in and carbon out are balanced, so CO₂ in the air holds steady.";
     drawGreenhouse(row);
+    syncNums(); saveSettings();
     const xs = rows.map(r => r.y), Cs = rows.map(r => r.C), Ts = rows.map(r => r.T);
     const cMax = Math.max(500, Math.ceil(Math.max(...Cs) / 100) * 100);
     lineChart($("c-co2"), { x: xs, xMin: Y0, xMax: Y1, yMin: 250, yMax: cMax, xTicks: 4, yTicks: 4, series: [{ y: Cs, color: "--co2", area: true, markY: row.C }], marker: year });
@@ -1643,6 +1748,13 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
       series: [{ y: Ts, color: "--heat", area: true, markY: row.T }], marker: year });
   }
   ["fossil", "forest", "year"].forEach(id => $(id).addEventListener("input", updateClimate));
+  $("climateReset").addEventListener("click", () => {
+    $("fossil").value = 10; $("forest").value = 100; $("year").value = 2100;
+    ["fossil", "forest", "year"].forEach(id => paintRange($(id)));
+    updateClimate();
+    $("climateStatus").textContent = "Back to today's values: 10 Gt, 100% forests, year 2100.";
+    setTimeout(() => { $("climateStatus").textContent = ""; }, 3500);
+  });
   $("sendBog").addEventListener("click", () => {
     const year = +$("year").value, row = rows[year - Y0];
     const arcticWarm = 2.5 * (row.T - rows[0].T);
@@ -1659,6 +1771,66 @@ tr.newgroup td { border-top: 3px solid var(--photo); }
     const sync = () => { bar.hidden = !(ctrlIn && !metersIn); document.body.classList.toggle("numbar-on", !bar.hidden); };
     new IntersectionObserver(es => { es.forEach(e => { ctrlIn = e.isIntersecting; }); sync(); }).observe($("controls"));
     new IntersectionObserver(es => { es.forEach(e => { metersIn = e.isIntersecting; }); sync(); }, { threshold: 0.6 }).observe(meters);
+  })();
+
+  /* ---------- exact-value boxes ---------- */
+  var numPairs = [];
+  document.querySelectorAll('input[type="range"]').forEach(r => {
+    const out = document.querySelector(`output[for="${r.id}"]`);
+    if (!out) return;
+    const wrap = document.createElement("span"); wrap.className = "numwrap";
+    const n = document.createElement("input");
+    n.type = "number"; n.className = "num"; n.min = r.min; n.max = r.max; n.step = r.step; n.id = r.id + "-num";
+    n.inputMode = "decimal";
+    const lab = r.labels && r.labels[0] ? r.labels[0].textContent : r.id;
+    n.setAttribute("aria-label", "Type a value for " + lab);
+    n.title = "Type a number and press Enter";
+    const unit = document.createElement("span"); unit.className = "numunit"; unit.setAttribute("aria-hidden", "true");
+    wrap.append(n, unit); out.after(wrap); out.classList.add("sr-only");
+    const dec = (String(r.step).split(".")[1] || "").length;
+    const pair = { r, n, unit, out, dec };
+    numPairs.push(pair);
+    const commit = () => {
+      let v = parseFloat(String(n.value).replace(",", "."));
+      if (isNaN(v)) { syncNum(pair, true); return; }
+      const st = +r.step, mn = +r.min;
+      v = Math.min(+r.max, Math.max(mn, v));
+      v = +(Math.round((v - mn) / st) * st + mn).toFixed(dec);
+      r.value = v;
+      r.dispatchEvent(new Event("input", { bubbles: true }));
+      syncNum(pair, true);
+    };
+    n.addEventListener("change", commit);
+    n.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); commit(); n.select(); } });
+  });
+  function syncNum(p, force) {
+    if (!force && document.activeElement === p.n) return;
+    p.n.value = (+p.r.value).toFixed(p.dec);
+    p.unit.textContent = p.out.textContent.replace(/^[-+−]?[\d.,]+\s?/, "");
+  }
+  function syncNums() { if (numPairs) numPairs.forEach(p => syncNum(p)); }
+
+  /* ---------- remembered settings ---------- */
+  var settingsReady = false;
+  function saveSettings() {
+    if (!settingsReady) return;
+    try { localStorage.setItem("peatlab-settings", JSON.stringify({ S, fossil: +$("fossil").value, forest: +$("forest").value, year: +$("year").value })); } catch (e) {}
+  }
+  (function restoreSettings() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem("peatlab-settings") || "null"); } catch (e) {}
+    if (saved && saved.S) {
+      const vals = {};
+      VARS.forEach(v => { const x = saved.S[v.key]; if (typeof x === "number" && x >= v.min && x <= v.max) vals[v.key] = x; });
+      Object.assign(S, vals);
+      VARS.forEach(v => { $("s-" + v.key).value = S[v.key]; });
+      ["fossil", "forest", "year"].forEach(id => { if (typeof saved[id] === "number") $(id).value = saved[id]; });
+      document.querySelectorAll('input[type="range"]').forEach(paintRange);
+      if (Object.keys(DEFAULTS).some(k => Math.abs(S[k] - DEFAULTS[k]) > 1e-6)) {
+        setTimeout(() => flash("Your last settings were restored. Click Reset to start over."), 50);
+      }
+    }
+    settingsReady = true;
   })();
 
   update();
