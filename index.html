@@ -235,6 +235,7 @@ h2[id] { scroll-margin-top: 64px; }
 .znow b { font-family: var(--f-mono); font-weight: 500; }
 .zwet { padding: 10px 12px 8px; border-radius: 8px; border: 1.5px solid var(--water); }
 .ztemp { border-color: var(--heat); }
+.zburn { border-color: var(--burn); border-style: dashed; }
 @media (max-width: 640px) {
   #zsvg .lbl { font-size: 17px; }
   #zsvg .lbl-sm { font-size: 15px; }
@@ -266,6 +267,9 @@ html { scroll-behavior: smooth; }
 .info:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .tip { display: block; margin-top: 6px; padding: 7px 10px; border-radius: 8px; background: var(--sunk); border-left: 3px solid var(--o2); font-size: 0.84rem; line-height: 1.4; color: var(--ink); font-family: var(--f-body); font-weight: 400; letter-spacing: 0; text-transform: none; }
 .lbl-row { display: inline-flex; align-items: center; }
+.rec-wrap { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+.rec-btn { padding: 4px 12px; font-size: 0.8rem; background: var(--photo); border-color: var(--photo); color: var(--bg); }
+.rec-status { font-size: 0.78rem; font-weight: 700; color: var(--photo); }
 .scale-note { font-size: 0.8rem; color: var(--muted); margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; }
 @media (min-width: 901px) and (max-height: 760px) { .scale-note { font-size: 0.72rem; } }
 /* peat carbon key */
@@ -482,7 +486,7 @@ html { scroll-behavior: smooth; }
           </div>
         </div>
         <div>
-          <p class="scale-note">Rates use a 0–100 scale: 0 = stopped, 100 = fastest. <button class="info" type="button" aria-expanded="false" aria-controls="tip-scale" aria-label="What does the 0 to 100 scale mean?" title="What does the 0 to 100 scale mean?">i</button></p>
+          <p class="scale-note">Rates use a 0–100 scale: 0 = stopped, 100 = fastest. <button class="info" type="button" aria-expanded="false" aria-controls="tip-scale" aria-label="What does the 0 to 100 scale mean?" title="What does the 0 to 100 scale mean?">i</button><span class="rec-wrap"><span id="recStatus" class="rec-status" role="status" aria-live="polite"></span><button class="btn rec-btn" id="record2" type="button">Record this trial</button></span></p>
           <span class="tip" id="tip-scale" hidden>These are not real-world units. 0 means the process has stopped, and 100 is the fastest it can go in this simulation. The ↑ and ↓ badges show how much each number went up or down after your last change.</span>
         </div>
         <div class="netkey netkey-wide" aria-hidden="true">
@@ -531,6 +535,11 @@ html { scroll-behavior: smooth; }
         <div class="ctrl zwet">
           <div class="ctrl-top"><label for="zWet">Water level in the bog</label><output id="zWetOut" for="zWet"></output></div>
           <input type="range" id="zWet" min="0" max="100" step="1" value="75">
+          <span class="hint">This is the same slider as in The bog. Moving either one moves both.</span>
+        </div>
+        <div class="ctrl zwet zburn">
+          <div class="ctrl-top"><label for="zBurn">Burning</label><output id="zBurnOut" for="zBurn"></output></div>
+          <input type="range" id="zBurn" min="0" max="100" step="1" value="0">
           <span class="hint">This is the same slider as in The bog. Moving either one moves both.</span>
         </div>
         <div class="ctrl zwet ztemp">
@@ -1016,6 +1025,11 @@ html { scroll-behavior: smooth; }
     update();
   });
 
+  $("zBurn").addEventListener("input", e => {
+    S.burn = +e.target.value;
+    $("s-burn").value = S.burn; paintRange($("s-burn"));
+    update();
+  });
   $("zTemp").addEventListener("input", e => {
     S.temp = +e.target.value;
     $("s-temp").value = S.temp; paintRange($("s-temp"));
@@ -1129,7 +1143,7 @@ html { scroll-behavior: smooth; }
     $("zFactors").innerHTML = F.map(([n, v]) => `<div class="flowbar"><span>${n}</span><div class="bar"><span style="width:${Math.round(v * 100)}%;background:var(${n.startsWith("Oxygen") ? "--o2" : "--burn"})"></span></div><span class="num">${Math.round(v * 100)}%</span></div>`).join("");
     const weakest = F.slice().sort((a, b) => a[1] - b[1])[0];
     const why = {
-      "Fire burning now": "There is no fire to survive the winter. Raise Burning above 0 in the bog controls.",
+      "Fire burning now": "There is no fire to survive the winter. Raise the Burning slider above 0.",
       "Dry peat to burn": "The water level is high, so there is little dry peat for the fire to creep into.",
       "Oxygen in the peat": "Water fills the air spaces in the peat, so the smoldering fire is smothered without oxygen.",
       "Thawed ground": "Most of the peat is frozen. A fire can't burn into frozen peat.",
@@ -1142,6 +1156,9 @@ html { scroll-behavior: smooth; }
     if (+$("zTemp").value !== S.temp) $("zTemp").value = S.temp;
     paintRange($("zTemp"));
     $("zTempOut").textContent = S.temp + " °C";
+    if (+$("zBurn").value !== S.burn) $("zBurn").value = S.burn;
+    paintRange($("zBurn"));
+    $("zBurnOut").textContent = S.burn + "%";
     $("znO").textContent = (S.o2 * (1 - 0.85 * S.wet / 100)).toFixed(1) + "%";
     $("znB").textContent = Math.round(m.B);
     $("zWhy").textContent = z.chance >= 50 ? "Dry, thawed, oxygen-rich peat lets the fire burrow deep enough to last the winter." : "Biggest obstacle: " + why[weakest[0]];
@@ -1212,7 +1229,7 @@ html { scroll-behavior: smooth; }
     }
     el("text", { x: 12, y: 24, class: "lbl-b" }, svg).textContent = ["Summer", "Fall", "Winter", "Spring"][season];
     const cap = [
-      z.fire > 0.05 ? "Summer: the fire burns at the surface. Where the peat is dry, air spaces let oxygen in, and the fire creeps downward into the peat." : "Summer: no fire is burning in this bog. Raise Burning in the bog controls to start one.",
+      z.fire > 0.05 ? "Summer: the fire burns at the surface. Where the peat is dry, air spaces let oxygen in, and the fire creeps downward into the peat." : "Summer: no fire is burning in this bog. Raise the Burning slider to start one.",
       z.fire > 0.05 ? "Fall: rain and cold put out the flames at the surface. Underground, the fire keeps smoldering in the dry peat, like a hot coal." : "Fall: no fire.",
       z.fire < 0.05 ? "Winter: no fire." : alive
         ? "Winter: snow covers the bog. Underneath, the fire smolders slowly, using the little oxygen that seeps through dry peat and burning the carbon stored in it. The snow keeps it insulated."
@@ -1353,12 +1370,17 @@ html { scroll-behavior: smooth; }
     $("logWrap").innerHTML = "<table><thead><tr>" + COLS.map(c => `<th scope="col">${c[0]}</th>`).join("") + "</tr></thead><tbody>" +
       log.map(r => "<tr>" + COLS.map(c => `<td${c[2] ? ` class="${c[2]}"` : ""}>${c[1](r)}</td>`).join("") + "</tr>").join("") + "</tbody></table>";
   }
-  $("record").addEventListener("click", () => {
+  let recTimer = null;
+  function recordTrial() {
     const m = model(S);
     log.push(Object.assign({ n: log.length + 1 }, S, { Teff: m.T.toFixed(1), P: Math.round(m.P), D: Math.round(m.D), B: Math.round(m.B), perm: Math.round(m.perm * 100), N: Math.round(m.N) }));
     saveLog(); renderLog();
     $("logStatus").textContent = `Recorded trial ${log.length}.`;
-  });
+    $("recStatus").textContent = `Saved as trial ${log.length}`;
+    clearTimeout(recTimer); recTimer = setTimeout(() => { $("recStatus").textContent = ""; }, 3000);
+  }
+  $("record").addEventListener("click", recordTrial);
+  $("record2").addEventListener("click", recordTrial);
   let clearArmed = null;
   function disarmClear() { clearTimeout(clearArmed); clearArmed = null; $("clear").textContent = "Clear"; $("clear").classList.remove("danger"); }
   $("clear").addEventListener("click", () => {
