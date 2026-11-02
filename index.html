@@ -234,6 +234,7 @@ h2[id] { scroll-margin-top: 64px; }
 .znow { font-size: 0.85rem; padding: 8px 10px; border-radius: 8px; background: var(--sunk); display: flex; flex-direction: column; gap: 2px; }
 .znow b { font-family: var(--f-mono); font-weight: 500; }
 .zwet { padding: 10px 12px 8px; border-radius: 8px; border: 1.5px solid var(--water); }
+.ztemp { border-color: var(--heat); }
 @media (max-width: 640px) {
   #zsvg .lbl { font-size: 17px; }
   #zsvg .lbl-sm { font-size: 15px; }
@@ -530,6 +531,11 @@ html { scroll-behavior: smooth; }
         <div class="ctrl zwet">
           <div class="ctrl-top"><label for="zWet">Water level in the bog</label><output id="zWetOut" for="zWet"></output></div>
           <input type="range" id="zWet" min="0" max="100" step="1" value="75">
+          <span class="hint">This is the same slider as in The bog. Moving either one moves both.</span>
+        </div>
+        <div class="ctrl zwet ztemp">
+          <div class="ctrl-top"><label for="zTemp">Summer temperature</label><output id="zTempOut" for="zTemp"></output></div>
+          <input type="range" id="zTemp" min="-5" max="30" step="1" value="10">
           <span class="hint">This is the same slider as in The bog. Moving either one moves both.</span>
         </div>
         <div><span class="sub">What the fire needs</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-zfac" aria-label="What do these bars mean?" title="What do these bars mean?">i</button><span class="tip" id="tip-zfac" hidden>Each bar shows how much that condition helps the fire survive the winter. A fire needs all five to be high. One short bar can put it out.</span></div>
@@ -1010,6 +1016,12 @@ html { scroll-behavior: smooth; }
     update();
   });
 
+  $("zTemp").addEventListener("input", e => {
+    S.temp = +e.target.value;
+    $("s-temp").value = S.temp; paintRange($("s-temp"));
+    update();
+  });
+
   /* ---------- info explainers ---------- */
   function closeTips(except) {
     document.querySelectorAll(".info[aria-expanded='true']").forEach(b => {
@@ -1127,6 +1139,9 @@ html { scroll-behavior: smooth; }
     if (+$("zWet").value !== S.wet) $("zWet").value = S.wet;
     paintRange($("zWet"));
     $("zWetOut").textContent = S.wet + "%";
+    if (+$("zTemp").value !== S.temp) $("zTemp").value = S.temp;
+    paintRange($("zTemp"));
+    $("zTempOut").textContent = S.temp + " °C";
     $("znO").textContent = (S.o2 * (1 - 0.85 * S.wet / 100)).toFixed(1) + "%";
     $("znB").textContent = Math.round(m.B);
     $("zWhy").textContent = z.chance >= 50 ? "Dry, thawed, oxygen-rich peat lets the fire burrow deep enough to last the winter." : "Biggest obstacle: " + why[weakest[0]];
