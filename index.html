@@ -260,6 +260,15 @@ html { scroll-behavior: smooth; }
 .btn.danger { background: var(--burn); border-color: var(--burn); color: #fff; }
 .btn:disabled { opacity: .5; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .delta { transition: none; } }
+/* collapsible graph */
+.collapse-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; cursor: pointer; font-family: var(--f-display); font-weight: 700; color: var(--ink); border-radius: 8px; padding: 2px 0; }
+.collapse-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.collapse-btn .chev { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--sunk); border: 1px solid var(--line); font-size: 0.9rem; transition: transform .2s ease; }
+.collapse-btn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.collapse-btn:hover .chev { border-color: var(--muted); }
+.collapse-hint { margin-left: auto; font-family: var(--f-body); font-weight: 600; font-size: 0.85rem; color: var(--surface); background: var(--photo); padding: 4px 12px; border-radius: 999px; }
+.collapse-body { display: flex; flex-direction: column; gap: 10px; }
+@media (prefers-reduced-motion: reduce) { .collapse-btn .chev { transition: none; } }
 /* info buttons and explainers */
 .info { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; margin-left: 6px; padding: 0; border-radius: 50%; border: 1.5px solid var(--o2); background: var(--surface); color: var(--o2); font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: 0.82rem; line-height: 1; cursor: pointer; vertical-align: middle; }
 .info::after { content: ""; position: absolute; inset: -7px; }
@@ -501,12 +510,15 @@ html { scroll-behavior: smooth; }
 
   <section aria-labelledby="graph-h">
     <div class="chart-box">
-      <div class="row" style="justify-content: space-between">
-        <h2 id="graph-h" style="font-size:1.3rem">Test one variable</h2>
-        <div class="row">
-          <label for="xVar" class="status">Change this variable:</label>
-          <select id="xVar"></select>
-        </div>
+      <h2 id="graph-h" style="font-size:1.3rem; margin:0">
+        <button class="collapse-btn" id="graphToggle" type="button" aria-expanded="false" aria-controls="graphBody">
+          <span class="chev" aria-hidden="true">▸</span><span>Test one variable</span><span class="collapse-hint" id="graphHint">Click to open the graph</span>
+        </button>
+      </h2>
+      <div id="graphBody" class="collapse-body" hidden>
+      <div class="row">
+        <label for="xVar" class="status">Change this variable:</label>
+        <select id="xVar"></select>
       </div>
       <p class="status">The graph shows each rate across the full range of one variable while every other setting stays where you left it. The dashed line marks your current setting.</p>
       <svg id="explore" viewBox="0 0 640 300" role="img" aria-label="Line graph of photosynthesis, decomposition and burning rates against the chosen variable"></svg>
@@ -514,6 +526,7 @@ html { scroll-behavior: smooth; }
         <span class="chip"><i style="background: var(--photo)"></i>Photosynthesis</span>
         <span class="chip"><i style="background: var(--resp)"></i>Decomposition</span>
         <span class="chip"><i style="background: var(--burn)"></i>Burning</span>
+      </div>
       </div>
     </div>
   </section>
@@ -1035,6 +1048,17 @@ html { scroll-behavior: smooth; }
     $("s-temp").value = S.temp; paintRange($("s-temp"));
     update();
   });
+
+  /* ---------- collapsible graph ---------- */
+  function setGraphOpen(open) {
+    $("graphToggle").setAttribute("aria-expanded", String(open));
+    $("graphBody").hidden = !open;
+    $("graphHint").textContent = open ? "Click to hide the graph" : "Click to open the graph";
+    if (open) drawExplore();
+  }
+  $("graphToggle").addEventListener("click", () => setGraphOpen($("graphToggle").getAttribute("aria-expanded") !== "true"));
+  document.querySelectorAll('a[href="#graph-h"]').forEach(a => a.addEventListener("click", () => setGraphOpen(true)));
+  if (location.hash === "#graph-h") setGraphOpen(true);
 
   /* ---------- info explainers ---------- */
   function closeTips(except) {
