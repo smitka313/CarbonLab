@@ -601,7 +601,13 @@ html { scroll-behavior: smooth; }
   </section>
 
   <section aria-labelledby="try-h">
-    <h2 id="try-h" style="font-size:1.3rem">Investigations to try</h2>
+    <div class="chart-box">
+    <h2 id="try-h" style="font-size:1.3rem; margin:0">
+      <button class="collapse-btn" id="tryToggle" type="button" aria-expanded="false" aria-controls="tryBody">
+        <span class="chev" aria-hidden="true">▸</span><span>Investigations to try</span><span class="collapse-hint" id="tryHint">Click to see the investigations</span>
+      </button>
+    </h2>
+    <div id="tryBody" class="collapse-body" hidden>
     <ul class="try">
       <li><b>High tilt</b>Set the tilt to 24.2°, like about 10,700 years ago. What happens to summer sunlight, temperature, and photosynthesis in the Arctic?</li>
       <li><b>Low tilt</b>Set the tilt to 22.1°. How much of the peat freezes into permafrost? Why can't decomposers or fire reach frozen peat?</li>
@@ -612,6 +618,8 @@ html { scroll-behavior: smooth; }
       <li><b>Zombie fire</b>Start a fire, then raise the water level a little at a time. At what water level does the fire stop surviving the winter? Why does water put it out?</li>
       <li><b>Thaw</b>Choose "Arctic heat wave." Is the bog still a carbon sink, or is carbon being released to the atmosphere?</li>
     </ul>
+    </div>
+    </div>
   </section>
 
   <div class="divider"></div>
@@ -1062,6 +1070,13 @@ html { scroll-behavior: smooth; }
     if (open) drawExplore();
   }
   $("graphToggle").addEventListener("click", () => setGraphOpen($("graphToggle").getAttribute("aria-expanded") !== "true"));
+  function setTryOpen(open) {
+    $("tryToggle").setAttribute("aria-expanded", String(open));
+    $("tryBody").hidden = !open;
+    $("tryHint").textContent = open ? "Click to hide the investigations" : "Click to see the investigations";
+  }
+  $("tryToggle").addEventListener("click", () => setTryOpen($("tryToggle").getAttribute("aria-expanded") !== "true"));
+  if (location.hash === "#try-h") setTryOpen(true);
   document.querySelectorAll('a[href="#graph-h"]').forEach(a => a.addEventListener("click", () => setGraphOpen(true)));
   if (location.hash === "#graph-h") setGraphOpen(true);
 
