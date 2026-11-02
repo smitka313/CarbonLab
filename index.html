@@ -159,6 +159,7 @@ svg .on-peat { fill: #f4ead9; }
 table { border-collapse: collapse; width: 100%; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
 th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th { font-family: var(--f-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 500; background: var(--sunk); }
+#logWrap th { white-space: normal; min-width: 7em; max-width: 11em; vertical-align: bottom; }
 th:first-child, td:first-child { text-align: left; }
 td.p { color: var(--photo); font-weight: 700; }
 td.r { color: var(--resp); font-weight: 700; }
@@ -1595,7 +1596,7 @@ html.bigtext { font-size: 115%; }
   /* ---------- data log ---------- */
   let log = [];
   try { log = JSON.parse(localStorage.getItem("peatlab-log") || "[]"); } catch (e) { log = []; }
-  const COLS = [["#", r => r.n], ["Label", r => r.label || ""], ["Tilt °", r => r.tilt.toFixed(2)], ["Temp °C", r => r.Teff], ["CO₂ ppm", r => r.co2], ["O₂ %", r => r.o2], ["Water %", r => r.wet], ["Burning %", r => r.burn], ["Photosynthesis", r => r.P, "p"], ["Decomposition", r => r.D, "r"], ["Fire", r => r.B, "b"], ["Permafrost %", r => r.perm], ["Net", r => (r.N > 0 ? "+" : "") + r.N], ["Survives winter %", r => r.zc == null ? "" : r.zc, "b"]];
+  const COLS = [["#", r => r.n], ["Label", r => r.label || ""], ["Earth's tilt (°)", r => r.tilt.toFixed(2)], ["Summer temperature with tilt (°C)", r => r.Teff], ["Carbon dioxide (ppm)", r => r.co2], ["Oxygen in the air (%)", r => r.o2], ["Water level in the bog (%)", r => r.wet], ["Burning slider (%)", r => r.burn], ["Photosynthesis", r => r.P, "p"], ["Decomposition", r => r.D, "r"], ["Burning", r => r.B, "b"], ["Permafrost (% frozen)", r => r.perm], ["Peat carbon", r => (r.N > 0 ? "+" : "") + r.N], ["Chance this fire survives the winter (%)", r => r.zc == null ? "" : r.zc, "b"]];
   function saveLog() { try { localStorage.setItem("peatlab-log", JSON.stringify(log)); } catch (e) {} }
   function renderLog() {
     $("undo").disabled = !log.length;
