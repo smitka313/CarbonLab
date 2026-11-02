@@ -115,6 +115,7 @@ select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); b
 .tiltbox svg { width: 100%; height: auto; display: block; }
 .facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; font-size: 0.82rem; margin: 0; }
 .facts dt { color: var(--muted); }
+.facts .facts-hi { font-weight: 700; color: var(--ink); border-top: 1px solid var(--line); padding-top: 3px; margin-top: 2px; }
 .facts dd { margin: 0; font-family: var(--f-mono); text-align: right; font-variant-numeric: tabular-nums; }
 
 .stage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -533,6 +534,7 @@ html.bigtext { font-size: 115%; }
             <dt>Summer sunlight at 65°N</dt><dd id="fQ"></dd>
             <dt>Change from today</dt><dd id="fQd"></dd>
             <dt>Summer warming from tilt</dt><dd id="fT"></dd>
+            <dt class="facts-hi">Summer temperature with tilt</dt><dd class="facts-hi" id="fTemp"></dd>
           </dl>
           <div><span class="sub">What do 65°N and W/m² mean?</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-tilt" aria-label="What do 65 degrees north and watts per square meter mean?" title="What do 65 degrees north and watts per square meter mean?">i</button><span class="tip" id="tip-tilt" hidden><b>65°N</b> is a latitude in the Arctic, where many peat bogs are. <b>W/m²</b> (watts per square meter) measures how much sunlight energy hits each square meter of ground.</span></div>
         </div>
@@ -897,7 +899,7 @@ html.bigtext { font-size: 115%; }
     const info = v.info ? `<button class="info" type="button" aria-expanded="false" aria-controls="tip-${v.key}" aria-label="${v.info[0]}" title="${v.info[0]}">i</button>` : "";
     d.innerHTML = `<div class="ctrl-top"><span class="lbl-row"><label for="s-${v.key}">${v.label}</label>${info}</span><output id="o-${v.key}" for="s-${v.key}"></output></div>${v.info ? `<span class="tip" id="tip-${v.key}" hidden>${v.info[1]}</span>` : ""}
       <input type="range" id="s-${v.key}" min="${v.min}" max="${v.max}" step="${v.step}" value="${S[v.key]}">
-      <span class="hint">${v.hint}</span>${v.key === "temp" ? '<span class="hint" id="effT"></span>' : ""}${v.key === "wet" ? '<div class="o2read"><div class="ctrl-top"><b>Oxygen in the peat</b><output id="o2Peat"></output></div><div class="bar"><span id="o2PeatBar" style="background: var(--o2)"></span></div><span class="hint" id="o2PeatTxt"></span></div>' : ""}`;
+      <span class="hint">${v.hint}</span>${v.key === "wet" ? '<div class="o2read"><div class="ctrl-top"><b>Oxygen in the peat</b><output id="o2Peat"></output></div><div class="bar"><span id="o2PeatBar" style="background: var(--o2)"></span></div><span class="hint" id="o2PeatTxt"></span></div>' : ""}`;
     sliders.appendChild(d);
   });
   VARS.forEach(v => $("s-" + v.key).addEventListener("input", e => { S[v.key] = +e.target.value; update(); }));
@@ -1315,7 +1317,7 @@ html.bigtext { font-size: 115%; }
     VARS.forEach(v => { $("o-" + v.key).textContent = v.fmt(S[v.key]); });
     const m = model(S);
     const dT = tiltWarming(S.tilt), dq = (m.relQ - 1) * 100;
-    $("effT").textContent = `With the tilt effect: ${m.T.toFixed(1)} °C`;
+    $("fTemp").textContent = m.T.toFixed(1) + " °C";
     $("fSun").textContent = (90 - LAT + S.tilt).toFixed(1) + "°";
     $("fQ").textContent = Math.round(m.q) + " W/m²";
     $("fQd").textContent = (dq >= 0 ? "+" : "") + dq.toFixed(1) + "%";
