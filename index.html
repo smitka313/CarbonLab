@@ -233,6 +233,7 @@ h2[id] { scroll-margin-top: 64px; }
 .flash { font-size: 0.85rem; font-weight: 700; color: var(--photo); min-height: 1.3em; }
 .znow { font-size: 0.85rem; padding: 8px 10px; border-radius: 8px; background: var(--sunk); display: flex; flex-direction: column; gap: 2px; }
 .znow b { font-family: var(--f-mono); font-weight: 500; }
+.zwet { padding: 10px 12px 8px; border-radius: 8px; border: 1.5px solid var(--water); }
 @media (max-width: 640px) {
   #zsvg .lbl { font-size: 17px; }
   #zsvg .lbl-sm { font-size: 15px; }
@@ -526,6 +527,11 @@ html { scroll-behavior: smooth; }
           <p class="status">Chance this fire survives the winter</p>
         </div>
         <div class="znow"><span class="sub">Bog settings now</span><span>Water level: <b id="znW"></b></span><span>Oxygen in the peat: <b id="znO"></b></span><span>Burning: <b id="znB"></b></span></div>
+        <div class="ctrl zwet">
+          <div class="ctrl-top"><label for="zWet">Water level in the bog</label><output id="zWetOut" for="zWet"></output></div>
+          <input type="range" id="zWet" min="0" max="100" step="1" value="75">
+          <span class="hint">This is the same slider as in The bog. Moving either one moves both.</span>
+        </div>
         <div><span class="sub">What the fire needs</span><button class="info" type="button" aria-expanded="false" aria-controls="tip-zfac" aria-label="What do these bars mean?" title="What do these bars mean?">i</button><span class="tip" id="tip-zfac" hidden>Each bar shows how much that condition helps the fire survive the winter. A fire needs all five to be high. One short bar can put it out.</span></div>
         <div class="flowbars" id="zFactors"></div>
         <p class="status" id="zWhy"></p>
@@ -998,6 +1004,12 @@ html { scroll-behavior: smooth; }
     settleTimer = setTimeout(() => { settled = r; badges.forEach(b => b.classList.remove("show")); }, 3000);
   }
 
+  $("zWet").addEventListener("input", e => {
+    S.wet = +e.target.value;
+    $("s-wet").value = S.wet; paintRange($("s-wet"));
+    update();
+  });
+
   /* ---------- info explainers ---------- */
   function closeTips(except) {
     document.querySelectorAll(".info[aria-expanded='true']").forEach(b => {
@@ -1112,6 +1124,9 @@ html { scroll-behavior: smooth; }
       "Summer heat": "Cool summers don't dry the peat deeply enough."
     };
     $("znW").textContent = S.wet + "%";
+    if (+$("zWet").value !== S.wet) $("zWet").value = S.wet;
+    paintRange($("zWet"));
+    $("zWetOut").textContent = S.wet + "%";
     $("znO").textContent = (S.o2 * (1 - 0.85 * S.wet / 100)).toFixed(1) + "%";
     $("znB").textContent = Math.round(m.B);
     $("zWhy").textContent = z.chance >= 50 ? "Dry, thawed, oxygen-rich peat lets the fire burrow deep enough to last the winter." : "Biggest obstacle: " + why[weakest[0]];
