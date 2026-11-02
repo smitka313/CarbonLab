@@ -292,6 +292,12 @@ html { scroll-behavior: smooth; }
 .netkey strong { font-weight: 700; }
 @media (min-width: 901px) { .lab #nText, .lab .meters .meter:last-child > .unit { display: none; } }
 .netkey-wide { display: none; }
+@media (max-width: 900px) { .lab .meters .meter:nth-child(n+3) { grid-column: 1 / -1; } }
+@media (min-width: 901px) {
+  .lab .meter .netkey { display: none; }
+  .netkey-wide { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 0.8rem; padding: 5px 10px; }
+  .netkey-wide span:first-child b { width: auto; font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--muted); }
+}
 @media (min-width: 901px) and (max-height: 760px) {
   .lab .meter .netkey { display: none; }
   .netkey-wide { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 0.74rem; padding: 4px 10px; }
@@ -307,7 +313,7 @@ html { scroll-behavior: smooth; }
 /* bigger picture while pinned on laptops */
 @media (min-width: 901px) {
   .lab .meter:not(:last-child) p { display: none; }
-  .lab > .stage #bog { max-height: calc(100vh - 372px); }
+  .lab > .stage #bog { max-height: calc(100vh - 300px); }
   .lab .legend .chip { font-size: 0.8rem; padding: 1px 8px; }
 }
 /* small laptops: narrower control panel */
@@ -368,6 +374,7 @@ html { scroll-behavior: smooth; }
     <a href="#graph-h">Test one variable</a>
     <a href="#zombie-h">Zombie fires</a>
     <a href="#log-h">Data table</a>
+    <a href="#try-h">Investigations</a>
     <a href="#climate-h">Global warming</a>
   </div>
 </nav>
@@ -1077,6 +1084,7 @@ html { scroll-behavior: smooth; }
   }
   $("tryToggle").addEventListener("click", () => setTryOpen($("tryToggle").getAttribute("aria-expanded") !== "true"));
   if (location.hash === "#try-h") setTryOpen(true);
+  document.querySelectorAll('a[href="#try-h"]').forEach(a => a.addEventListener("click", () => setTryOpen(true)));
   document.querySelectorAll('a[href="#graph-h"]').forEach(a => a.addEventListener("click", () => setGraphOpen(true)));
   if (location.hash === "#graph-h") setGraphOpen(true);
 
