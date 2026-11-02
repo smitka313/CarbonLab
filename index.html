@@ -214,7 +214,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 h2[id] { scroll-margin-top: calc(var(--navh, 52px) + 12px); }
 /* keep the bog picture and numbers on screen while the controls scroll */
 @media (min-width: 901px) {
-  .lab > .stage { position: sticky; top: calc(var(--navh, 52px) + 8px); max-height: calc(100vh - var(--navh, 52px) - 20px); overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+  .lab > .stage { position: sticky; top: calc(var(--navh, 52px) + 8px); max-height: calc(100vh - var(--navh, 52px) - 20px); overflow-y: auto; scrollbar-gutter: stable; overscroll-behavior: contain; padding-right: 4px; }
   .lab > .stage #bog { max-height: calc(100vh - 350px); min-height: 220px; }
   .lab .meter p { font-size: 0.78rem; }
   .lab .meter { padding: 10px 14px; gap: 6px; }
